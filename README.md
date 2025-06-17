@@ -59,4 +59,8 @@ This project is licensed under the MIT License.
 
 ---
 
+<<<<<<< HEAD
 *Designed and developed by [Muhammad Owais Raza](https://github.com/owaisraza01).*
+=======
+*Designed and developed by [Muhammad Owais Raza](https://github.com/owaisraza01).*
+>>>>>>> 393ec98bdc2baf55833e21e24918f428e51e9aca
