@@ -11,3 +11,10 @@ mongoose.connect(process.env.MONGO_URI, {
 }).catch(err => {
     console.error(err);
 });
+
+app.use(express.static(path.join(__dirname, '../frontend/build')));
+
+// For any other routes, serve the React index.html
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+});
