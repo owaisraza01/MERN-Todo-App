@@ -139,7 +139,7 @@ const Login = () => {
                         color="text.secondary"
                         sx={{ fontSize: 17, mb: 2.5, fontWeight: 500 }}
                     >
-                        to your Org Todo Dashboard
+                        to your Master Motors Todo Dashboard
                     </Typography>
                     <Divider sx={{ mb: 3, borderColor: theme.palette.mode === 'dark' ? '#2193b044' : undefined }} />
                     <form onSubmit={handleSubmit}>
