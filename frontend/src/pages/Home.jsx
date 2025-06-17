@@ -75,7 +75,7 @@ const Home = ({ mode, setMode }) => {
                     <Box
                         component="img"
                         src={logo}
-                        alt="Master Motors Todo Dashboard Logo"
+                        alt="Org Todo Dashboard Logo"
                         sx={{
                             height: 48,
                             width: 48,
@@ -96,7 +96,6 @@ const Home = ({ mode, setMode }) => {
                             fontWeight: 900,
                             letterSpacing: "-1px",
                             fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-                            background: "linear-gradient(90deg, #1976d2 10%, #42a5f5 100%)",
                             textShadow: theme.palette.mode === "dark"
                                 ? "0 2px 10px #0002"
                                 : "0 1px 0 #ffffff60",
