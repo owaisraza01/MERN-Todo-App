@@ -1,3 +1,5 @@
+const express = require('express'); // <-- Add this!
+const path = require('path');       // <-- Add this!
 const app = require('./app');
 const mongoose = require('mongoose');
 
@@ -12,6 +14,7 @@ mongoose.connect(process.env.MONGO_URI, {
     console.error(err);
 });
 
+// Serve static files from the React app
 app.use(express.static(path.join(__dirname, '../frontend/build')));
 
 // For any other routes, serve the React index.html
