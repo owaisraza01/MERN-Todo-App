@@ -2,6 +2,14 @@
 
 A modern, full-stack organizational task management dashboard built with React, Node.js, and Material-UI. This project enables teams and organizations to manage, track, and collaborate on tasks efficiently with a beautiful, intuitive, and theme-friendly interface.
 
+---
+
+## 🚀 Live Demo
+
+**Try it now:** [https://mern-todo-app-moyn.onrender.com/]  
+
+---
+
 ## ✨ Features
 
 - **User Authentication:** Secure registration and login with JWT.
@@ -13,7 +21,18 @@ A modern, full-stack organizational task management dashboard built with React, 
 - **Accessible:** WCAG-compliant color contrast and keyboard navigability.
 - **Scalable:** Easy to deploy as a monolith or with separate frontend/backend.
 
-## 🚀 Tech Stack
+---
+
+## 🧑‍💼 Demo Credentials
+
+> **To quickly explore the app, use these demo credentials:**
+> - **Email:** owais@gmail.com
+> - **Password:** 123
+> *(Or register your own account!)*
+
+---
+
+## 🛠️ Tech Stack
 
 - **Frontend:** React, Material-UI (MUI), Recharts
 - **Backend:** Node.js, Express
@@ -21,9 +40,13 @@ A modern, full-stack organizational task management dashboard built with React, 
 - **Authentication:** JWT-based
 - **Deployment Ready:** Easily deploy on Render, Vercel, Railway, Heroku, etc.
 
+---
+
 ## 📸 Screenshots
 
 *Add screenshots here to showcase the UI in both light and dark mode!*
+
+---
 
 ## 🛠️ Getting Started
 
@@ -45,13 +68,19 @@ A modern, full-stack organizational task management dashboard built with React, 
    npm install && npm start
    ```
 
+---
+
 ## 📦 Deployment
 
 - See the `DEPLOYMENT.md` for step-by-step deployment guides for both monolithic and separate deployments.
 
+---
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please open issues and pull requests for improvements, bug fixes, or new features.
+
+---
 
 ## 📄 License
 
@@ -59,8 +88,4 @@ This project is licensed under the MIT License.
 
 ---
 
-<<<<<<< HEAD
 *Designed and developed by [Muhammad Owais Raza](https://github.com/owaisraza01).*
-=======
-*Designed and developed by [Muhammad Owais Raza](https://github.com/owaisraza01).*
->>>>>>> 393ec98bdc2baf55833e21e24918f428e51e9aca
