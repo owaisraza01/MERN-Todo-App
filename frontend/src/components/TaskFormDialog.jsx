@@ -91,6 +91,7 @@ const TaskFormDialog = ({ open, onClose, editTask }) => {
                 });
             }
             onClose(true);
+            window.location.reload();
         } catch {
             onClose(false);
         }
