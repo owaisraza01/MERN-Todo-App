@@ -4,7 +4,8 @@ import App from './App';
 import '@fontsource/inter';
 import axios from 'axios';
 
-axios.defaults.baseURL = 'http://localhost:5000';
+// Use environment variable (works both locally and on Render)
+axios.defaults.baseURL = process.env.REACT_APP_API_URL;
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
