@@ -84,7 +84,7 @@ const Dashboard = () => {
                 <Card
                     elevation={10}
                     sx={{
-                        borderRadius: 5,
+                        borderRadius: 1,
                         background: theme.palette.mode === 'dark'
                             ? 'linear-gradient(135deg, #232526 0%, #414345 100%)'
                             : 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
@@ -139,7 +139,7 @@ const Dashboard = () => {
                 <Card
                     elevation={8}
                     sx={{
-                        borderRadius: 5,
+                        borderRadius: 1,
                         background: glassBg,
                         boxShadow: theme.palette.mode === "dark"
                             ? "0 4px 22px 0 #000b"
@@ -232,7 +232,7 @@ const Dashboard = () => {
                                     contentStyle={{
                                         background: glassBg,
                                         border: "1.5px solid #eee",
-                                        borderRadius: 10,
+                                        borderRadius: 2,
                                         boxShadow: "0 2px 12px #0001",
                                     }}
                                 />

@@ -79,7 +79,7 @@ const TaskTable = () => {
             elevation={8}
             sx={{
                 my: 2,
-                borderRadius: 5,
+                borderRadius: 1,
                 background: glassBg,
                 boxShadow: theme.palette.mode === 'dark'
                     ? '0 8px 36px 0 #000b'
@@ -103,7 +103,7 @@ const TaskTable = () => {
                         startIcon={<AddTaskIcon />}
                         onClick={() => setOpenForm(true)}
                         sx={{
-                            borderRadius: 3,
+                            borderRadius: 1,
                             fontWeight: 700,
                             fontSize: 15,
                             py: 1.1,
@@ -120,7 +120,7 @@ const TaskTable = () => {
                     </Button>
                 </Stack>
                 <TableContainer component={Paper} sx={{
-                    borderRadius: 3,
+                    borderRadius: 1,
                     background: tableBg,
                     boxShadow: theme.palette.mode === 'dark'
                         ? '0 0px 18px 0 #0005'

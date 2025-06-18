@@ -8,7 +8,7 @@ const ThemeToggle = ({ mode, setMode }) => (
             <IconButton
                 sx={{
                     ml: 1,
-                    borderRadius: 2,
+                    borderRadius: 1,
                     background: mode === 'dark'
                         ? 'linear-gradient(135deg, #232526 0%, #414345 100%)'
                         : 'linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%)',

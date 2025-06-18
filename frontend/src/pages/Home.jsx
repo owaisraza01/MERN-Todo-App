@@ -79,7 +79,7 @@ const Home = ({ mode, setMode }) => {
                         sx={{
                             height: 48,
                             width: 48,
-                            borderRadius: 2,
+                            borderRadius: 1,
                             mr: 2,
                             boxShadow: theme.palette.mode === "dark"
                                 ? "0 2px 10px 0 #0006"
@@ -110,7 +110,7 @@ const Home = ({ mode, setMode }) => {
                             ml: 2,
                             px: 2.5,
                             py: 1,
-                            borderRadius: 2,
+                            borderRadius: 1,
                             fontWeight: 700,
                             fontSize: 15,
                             background: "linear-gradient(90deg, #f093fb 0%, #f5576c 100%)",
@@ -132,7 +132,7 @@ const Home = ({ mode, setMode }) => {
                 <Paper
                     elevation={8}
                     sx={{
-                        borderRadius: 5,
+                        borderRadius: 1,
                         p: { xs: 2, md: 4 },
                         background: glassBg,
                         boxShadow: theme.palette.mode === "dark"
@@ -158,7 +158,7 @@ const Home = ({ mode, setMode }) => {
                         mb: 3,
                         borderColor: theme.palette.primary.light,
                         borderWidth: 2,
-                        borderRadius: 2,
+                        borderRadius: 1,
                         opacity: 0.25,
                     }} />
                     <Dashboard />
@@ -166,7 +166,7 @@ const Home = ({ mode, setMode }) => {
                 <Paper
                     elevation={4}
                     sx={{
-                        borderRadius: 5,
+                        borderRadius: 1,
                         p: { xs: 2, md: 4 },
                         background: glassBg,
                         boxShadow: theme.palette.mode === "dark"

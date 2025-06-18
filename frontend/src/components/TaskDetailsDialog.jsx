@@ -55,7 +55,7 @@ const TaskDetailsDialog = ({ task, onClose }) => {
             maxWidth="sm"
             PaperProps={{
                 sx: {
-                    borderRadius: 5,
+                    borderRadius: 1,
                     background: glassBg,
                     boxShadow: theme.palette.mode === 'dark'
                         ? '0 12px 48px 0 #000b'
@@ -93,7 +93,7 @@ const TaskDetailsDialog = ({ task, onClose }) => {
                     <Typography
                         sx={{
                             bgcolor: descriptionBg,
-                            borderRadius: 3,
+                            borderRadius: 1,
                             px: 2,
                             py: 1.2,
                             fontSize: 16,
@@ -172,7 +172,7 @@ const TaskDetailsDialog = ({ task, onClose }) => {
                     variant="contained"
                     onClick={onClose}
                     sx={{
-                        borderRadius: 3,
+                        borderRadius: 1,
                         px: 3,
                         fontWeight: 700,
                         background: 'linear-gradient(90deg, #6dd5ed 0%, #2193b0 100%)',

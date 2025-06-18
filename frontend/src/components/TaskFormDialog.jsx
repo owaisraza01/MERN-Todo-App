@@ -114,7 +114,7 @@ const TaskFormDialog = ({ open, onClose, editTask }) => {
             maxWidth="sm"
             PaperProps={{
                 sx: {
-                    borderRadius: 5,
+                    borderRadius: 1,
                     background: glassBg,
                     boxShadow: theme.palette.mode === 'dark'
                         ? '0 10px 40px 0 #000b'
@@ -151,7 +151,7 @@ const TaskFormDialog = ({ open, onClose, editTask }) => {
                                 startAdornment: <AssignmentIcon sx={{ mr: 1, color: theme.palette.mode === "dark" ? "#a3aed6" : "#789" }} />,
                                 sx: {
                                     bgcolor: inputBg,
-                                    borderRadius: 2,
+                                    borderRadius: 1,
                                     fontWeight: 600,
                                     fontSize: 16,
                                 }
@@ -168,7 +168,7 @@ const TaskFormDialog = ({ open, onClose, editTask }) => {
                             InputProps={{
                                 sx: {
                                     bgcolor: inputBg,
-                                    borderRadius: 2,
+                                    borderRadius: 1,
                                     fontWeight: 500,
                                 }
                             }}
@@ -182,7 +182,7 @@ const TaskFormDialog = ({ open, onClose, editTask }) => {
                                 onChange={handleChange}
                                 fullWidth
                                 InputProps={{
-                                    sx: { bgcolor: inputBg, borderRadius: 2 },
+                                    sx: { bgcolor: inputBg, borderRadius: 1 },
                                 }}
                             >
                                 {statuses.map(s => (
@@ -205,7 +205,7 @@ const TaskFormDialog = ({ open, onClose, editTask }) => {
                                 onChange={handleChange}
                                 fullWidth
                                 InputProps={{
-                                    sx: { bgcolor: inputBg, borderRadius: 2 },
+                                    sx: { bgcolor: inputBg, borderRadius: 1 },
                                 }}
                             >
                                 {priorities.map(p => (
@@ -231,7 +231,7 @@ const TaskFormDialog = ({ open, onClose, editTask }) => {
                             onChange={handleChange}
                             InputProps={{
                                 startAdornment: <CalendarMonthIcon sx={{ mr: 1, color: theme.palette.mode === "dark" ? "#a3aed6" : "#789" }} />,
-                                sx: { bgcolor: inputBg, borderRadius: 2 }
+                                sx: { bgcolor: inputBg, borderRadius: 1 }
                             }}
                         />
                         <TextField
@@ -267,7 +267,7 @@ const TaskFormDialog = ({ open, onClose, editTask }) => {
                             onChange={handleAssignees}
                             InputProps={{
                                 startAdornment: <PersonAddIcon sx={{ mr: 1, color: theme.palette.mode === "dark" ? "#a3aed6" : "#789" }} />,
-                                sx: { bgcolor: inputBg, borderRadius: 2 }
+                                sx: { bgcolor: inputBg, borderRadius: 1 }
                             }}
                         >
                             {(users || []).map(user => (
@@ -288,7 +288,7 @@ const TaskFormDialog = ({ open, onClose, editTask }) => {
                         variant="outlined"
                         onClick={() => onClose(false)}
                         sx={{
-                            borderRadius: 3,
+                            borderRadius: 1,
                             px: 3,
                             fontWeight: 700,
                             textTransform: 'none',
@@ -300,7 +300,7 @@ const TaskFormDialog = ({ open, onClose, editTask }) => {
                         type="submit"
                         variant="contained"
                         sx={{
-                            borderRadius: 3,
+                            borderRadius: 1,
                             px: 3,
                             fontWeight: 700,
                             background: 'linear-gradient(90deg, #6dd5ed 0%, #2193b0 100%)',

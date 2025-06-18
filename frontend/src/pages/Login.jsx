@@ -70,7 +70,7 @@ const Login = () => {
                     minHeight: { md: 480 },
                     maxWidth: 950,
                     width: '100%',
-                    borderRadius: 7,
+                    borderRadius: 1,
                     overflow: 'hidden',
                     boxShadow: theme.palette.mode === 'dark'
                         ? '0 10px 40px 0 #000b'
@@ -100,7 +100,7 @@ const Login = () => {
                         style={{
                             maxWidth: '100%',
                             maxHeight: 340,
-                            borderRadius: 22,
+                            borderRadius: 1,
                             boxShadow: theme.palette.mode === 'dark'
                                 ? '0 6px 32px 0 #0007'
                                 : '0 6px 32px 0 rgba(33,147,176,0.14)',
@@ -155,7 +155,7 @@ const Login = () => {
                             variant="outlined"
                             InputProps={{
                                 sx: {
-                                    borderRadius: 3,
+                                    borderRadius: 1,
                                     fontSize: 16,
                                     bgcolor: inputBg,
                                     color: theme.palette.text.primary,
@@ -187,7 +187,7 @@ const Login = () => {
                             variant="outlined"
                             InputProps={{
                                 sx: {
-                                    borderRadius: 3,
+                                    borderRadius: 1,
                                     fontSize: 16,
                                     bgcolor: inputBg,
                                     color: theme.palette.text.primary,
@@ -228,7 +228,7 @@ const Login = () => {
                             startIcon={<LoginIcon />}
                             sx={{
                                 mt: 1,
-                                borderRadius: 3,
+                                borderRadius: 1,
                                 fontSize: 17,
                                 fontWeight: 700,
                                 py: 1.3,
@@ -252,7 +252,7 @@ const Login = () => {
                             onClick={() => nav('/register')}
                             sx={{
                                 mt: 2,
-                                borderRadius: 3,
+                                borderRadius: 1,
                                 fontWeight: 600,
                                 textTransform: 'none',
                                 fontSize: 15,
