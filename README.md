@@ -44,7 +44,10 @@ A modern, full-stack organizational task management dashboard built with React, 
 
 ## 📸 Screenshots
 
-*Add screenshots here to showcase the UI in both light and dark mode!*
+![image](https://github.com/user-attachments/assets/29504f31-2506-4a77-a485-4231ec091969)
+![image](https://github.com/user-attachments/assets/48e128b3-58aa-4c82-952f-687e0deb5409)
+![image](https://github.com/user-attachments/assets/e63f0234-62a6-4666-9ff8-a6b06939627d)
+![image](https://github.com/user-attachments/assets/580d8782-bdd2-47e9-977a-a1498f69ce66)
 
 ---
 
