@@ -6,6 +6,7 @@ import {
 import AddTaskIcon from '@mui/icons-material/AddTask';
 import TableRowsRoundedIcon from '@mui/icons-material/TableRowsRounded';
 import ViewKanbanRoundedIcon from '@mui/icons-material/ViewKanbanRounded';
+import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
@@ -135,6 +136,26 @@ const Tasks = () => {
         if (val) { setViewMode(val); setSelected([]); }
     };
 
+    const handleExportCSV = () => {
+        const headers = ['Title', 'Status', 'Priority', 'Due Date', 'Assignees', 'Created'];
+        const rows = tasks.map(t => [
+            `"${t.title.replace(/"/g, '""')}"`,
+            t.status,
+            t.priority,
+            t.dueDate ? new Date(t.dueDate).toLocaleDateString() : '',
+            `"${(t.assignedTo || []).map(u => u.name || u.email).join('; ')}"`,
+            new Date(t.createdAt).toLocaleDateString(),
+        ].join(','));
+        const csv = [headers.join(','), ...rows].join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'taskflow-tasks.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
     return (
         <Box>
             <Card
@@ -147,6 +168,16 @@ const Tasks = () => {
                             Tasks
                         </Typography>
                         <Stack direction="row" spacing={1.5} alignItems="center">
+                            <Button
+                                variant="outlined"
+                                size="small"
+                                startIcon={<DownloadRoundedIcon />}
+                                onClick={handleExportCSV}
+                                disabled={tasks.length === 0}
+                                sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
+                            >
+                                CSV
+                            </Button>
                             <ToggleButtonGroup
                                 value={viewMode}
                                 exclusive

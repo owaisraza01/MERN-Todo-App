@@ -13,6 +13,7 @@ import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
 import EventBusyRoundedIcon from '@mui/icons-material/EventBusyRounded';
 import axios from 'axios';
+import { useAuth } from '../hooks/useAuth';
 import { DashboardSkeleton } from './ui/SkeletonLoader';
 
 const STAT_CARDS = [
@@ -47,6 +48,7 @@ const BAR_COLORS = { low: '#43e97b', medium: '#fdcb6e', high: '#e17055' };
 
 const Dashboard = () => {
     const theme = useTheme();
+    const { authHeader } = useAuth();
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({ total: 0, pending: 0, inprogress: 0, completed: 0, low: 0, medium: 0, high: 0 });
     const [dueSoon, setDueSoon] = useState([]);
@@ -56,10 +58,7 @@ const Dashboard = () => {
         const fetch = async () => {
             setLoading(true);
             try {
-                const token = localStorage.getItem('token');
-                const { data } = await axios.get('/api/tasks', {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+                const { data } = await axios.get('/api/tasks', { headers: authHeader });
 
                 const now = new Date();
                 const threeDaysLater = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);

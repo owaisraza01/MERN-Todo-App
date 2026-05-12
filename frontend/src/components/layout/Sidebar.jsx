@@ -5,6 +5,7 @@ import {
 } from '@mui/material';
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
 import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
+import BarChartRoundedIcon from '@mui/icons-material/BarChartRounded';
 import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import ThemeToggle from '../ThemeToggle';
@@ -18,6 +19,7 @@ export const SIDEBAR_WIDTH = 260;
 const NAV_ITEMS = [
     { label: 'Dashboard', icon: <DashboardRoundedIcon />, view: 'dashboard' },
     { label: 'Tasks', icon: <AssignmentRoundedIcon />, view: 'tasks' },
+    { label: 'Analytics', icon: <BarChartRoundedIcon />, view: 'analytics' },
     { label: 'Profile', icon: <AccountCircleRoundedIcon />, view: 'profile' },
 ];
 
