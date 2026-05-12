@@ -1,229 +1,225 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
-    Typography, Button, Table, TableHead, TableRow, TableCell, TableBody,
-    Chip, Stack, Box, Avatar, Tooltip, IconButton, useTheme, TableContainer, Paper, Card, CardContent,
+    Table, TableHead, TableRow, TableCell, TableBody, Chip, Stack, Box,
+    Avatar, Tooltip, IconButton, useTheme, TableContainer, Paper, Checkbox,
+    Button, Typography, Collapse,
 } from '@mui/material';
-import AddTaskIcon from '@mui/icons-material/AddTask';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import TaskFormDialog from './TaskFormDialog';
-import TaskDetailsDialog from './TaskDetailsDialog';
+import ArchiveRoundedIcon from '@mui/icons-material/ArchiveRounded';
+import DeleteSweepRoundedIcon from '@mui/icons-material/DeleteSweepRounded';
 import EmptyState from './ui/EmptyState';
 import { TaskTableSkeleton } from './ui/SkeletonLoader';
-import axios from 'axios';
-import toast from 'react-hot-toast';
 
-const statusColors = {
+const STATUS_COLORS = {
     pending: 'warning',
     'in-progress': 'info',
     completed: 'success',
 };
 
-const priorityColors = {
+const PRIORITY_COLORS = {
     low: 'default',
     medium: 'warning',
     high: 'error',
 };
 
-const TaskTable = () => {
-    const [tasks, setTasks] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [openForm, setOpenForm] = useState(false);
-    const [editTask, setEditTask] = useState(null);
-    const [detailsTask, setDetailsTask] = useState(null);
+const TaskTable = ({
+    tasks = [],
+    loading = false,
+    selected = [],
+    onSelectChange,
+    onEdit,
+    onDelete,
+    onArchive,
+    onView,
+    onBulkDelete,
+}) => {
     const theme = useTheme();
 
-    const fetchTasks = async () => {
-        setLoading(true);
-        try {
-            const token = localStorage.getItem('token');
-            const { data } = await axios.get('/api/tasks', {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            setTasks(data);
-        } catch {
-            toast.error('Failed to load tasks');
-        } finally {
-            setLoading(false);
-        }
+    const allSelected = tasks.length > 0 && selected.length === tasks.length;
+    const someSelected = selected.length > 0 && selected.length < tasks.length;
+
+    const toggleAll = () => {
+        onSelectChange(allSelected ? [] : tasks.map(t => t._id));
     };
 
-    useEffect(() => { fetchTasks(); }, []);
-
-    const handleEdit = (task) => { setEditTask(task); setOpenForm(true); };
-
-    const handleFormClose = (refresh = false) => {
-        setOpenForm(false);
-        setEditTask(null);
-        if (refresh) fetchTasks();
+    const toggleOne = (id) => {
+        onSelectChange(
+            selected.includes(id) ? selected.filter(s => s !== id) : [...selected, id]
+        );
     };
 
-    const handleDelete = async (taskId) => {
-        if (!window.confirm('Delete this task?')) return;
-        const token = localStorage.getItem('token');
-        try {
-            await axios.delete(`/api/tasks/${taskId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            toast.success('Task deleted');
-            fetchTasks();
-        } catch {
-            toast.error('Failed to delete task');
-        }
-    };
+    if (loading) return <TaskTableSkeleton />;
 
-    const tableBg = theme.palette.mode === 'dark' ? '#1a2030' : '#ffffff';
+    if (!loading && tasks.length === 0) {
+        return (
+            <EmptyState
+                title="No tasks found"
+                subtitle="Try adjusting your filters or create a new task"
+            />
+        );
+    }
 
     return (
-        <Card
-            elevation={0}
-            sx={{
-                borderRadius: 3,
-                border: '1px solid',
-                borderColor: 'divider',
-                bgcolor: theme.palette.mode === 'dark' ? '#1e2533' : '#ffffff',
-            }}
-        >
-            <CardContent>
-                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-                    <Typography variant="h6" fontWeight={800} color="primary">
-                        Tasks
+        <Box>
+            <Collapse in={selected.length > 0}>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2,
+                        px: 2,
+                        py: 1,
+                        mb: 1.5,
+                        borderRadius: 2,
+                        bgcolor: 'primary.main',
+                        color: '#fff',
+                    }}
+                >
+                    <Typography fontWeight={700} fontSize={14}>
+                        {selected.length} selected
                     </Typography>
                     <Button
-                        variant="contained"
-                        startIcon={<AddTaskIcon />}
-                        onClick={() => setOpenForm(true)}
-                        sx={{
-                            borderRadius: 2,
-                            fontWeight: 700,
-                            background: 'linear-gradient(90deg, #6dd5ed 0%, #2193b0 100%)',
-                            textTransform: 'none',
-                            '&:hover': { background: 'linear-gradient(90deg, #2193b0 0%, #6dd5ed 100%)' },
-                        }}
+                        size="small"
+                        startIcon={<DeleteSweepRoundedIcon />}
+                        onClick={onBulkDelete}
+                        sx={{ color: '#fff', borderColor: '#fff', textTransform: 'none', fontWeight: 700 }}
+                        variant="outlined"
                     >
-                        Add Task
+                        Delete Selected
                     </Button>
-                </Stack>
-
-                {loading ? (
-                    <TaskTableSkeleton />
-                ) : tasks.length === 0 ? (
-                    <EmptyState
-                        title="No tasks yet"
-                        subtitle="Create your first task and start tracking your work"
-                        actionLabel="Add Task"
-                        onAction={() => setOpenForm(true)}
-                    />
-                ) : (
-                    <TableContainer
-                        component={Paper}
-                        elevation={0}
-                        sx={{ borderRadius: 2, background: tableBg, border: '1px solid', borderColor: 'divider' }}
+                    <Button
+                        size="small"
+                        onClick={() => onSelectChange([])}
+                        sx={{ color: '#fff', textTransform: 'none', ml: 'auto' }}
                     >
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    {['Title', 'Status', 'Priority', 'Due', 'Assignees', 'Actions'].map(col => (
-                                        <TableCell
-                                            key={col}
-                                            align={col === 'Actions' ? 'right' : 'left'}
-                                            sx={{ fontWeight: 700, fontSize: 14 }}
-                                        >
-                                            {col}
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {tasks.map(task => (
-                                    <TableRow
-                                        key={task._id}
-                                        hover
-                                        sx={{ cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' } }}
-                                    >
-                                        <TableCell
-                                            onClick={() => setDetailsTask(task)}
-                                            sx={{ fontWeight: 600, fontSize: 14, maxWidth: 220 }}
-                                        >
-                                            <Tooltip title="View details" arrow>
-                                                <Box sx={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: 200 }}>
-                                                    {task.title}
-                                                </Box>
-                                            </Tooltip>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Chip
-                                                label={task.status?.replace('-', ' ')}
-                                                color={statusColors[task.status] || 'default'}
-                                                size="small"
-                                                sx={{ fontWeight: 600, textTransform: 'capitalize' }}
-                                            />
-                                        </TableCell>
-                                        <TableCell>
-                                            <Chip
-                                                label={task.priority}
-                                                color={priorityColors[task.priority]}
-                                                size="small"
-                                                sx={{ fontWeight: 600, textTransform: 'capitalize' }}
-                                            />
-                                        </TableCell>
-                                        <TableCell sx={{ fontSize: 13, color: 'text.secondary' }}>
-                                            {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '—'}
-                                        </TableCell>
-                                        <TableCell>
-                                            <Stack direction="row" spacing={0.5}>
-                                                {(task.assignedTo || []).length === 0 ? (
-                                                    <Chip label="Unassigned" size="small" sx={{ color: 'text.disabled' }} />
-                                                ) : (
-                                                    (task.assignedTo || []).map(u => (
-                                                        <Chip
-                                                            key={u._id}
-                                                            avatar={
-                                                                u.avatar
-                                                                    ? <Avatar src={u.avatar} />
-                                                                    : <Avatar sx={{ width: 22, height: 22, fontSize: 11 }}>
-                                                                        {(u.name || u.email || 'U')[0]}
-                                                                    </Avatar>
-                                                            }
-                                                            label={u.name || u.email}
-                                                            size="small"
-                                                            sx={{ fontWeight: 500, maxWidth: 110 }}
-                                                        />
-                                                    ))
-                                                )}
-                                            </Stack>
-                                        </TableCell>
-                                        <TableCell align="right">
-                                            <Stack direction="row" spacing={0.5} justifyContent="flex-end">
-                                                <Tooltip title="View details" arrow>
-                                                    <IconButton size="small" onClick={() => setDetailsTask(task)}>
-                                                        <VisibilityIcon fontSize="small" color="primary" />
-                                                    </IconButton>
-                                                </Tooltip>
-                                                <Tooltip title="Edit" arrow>
-                                                    <IconButton size="small" onClick={() => handleEdit(task)}>
-                                                        <EditNoteIcon fontSize="small" sx={{ color: 'secondary.main' }} />
-                                                    </IconButton>
-                                                </Tooltip>
-                                                <Tooltip title="Delete" arrow>
-                                                    <IconButton size="small" color="error" onClick={() => handleDelete(task._id)}>
-                                                        <DeleteOutlineIcon fontSize="small" />
-                                                    </IconButton>
-                                                </Tooltip>
-                                            </Stack>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                )}
+                        Clear
+                    </Button>
+                </Box>
+            </Collapse>
 
-                <TaskFormDialog open={openForm} onClose={handleFormClose} editTask={editTask} />
-                <TaskDetailsDialog task={detailsTask} onClose={() => setDetailsTask(null)} />
-            </CardContent>
-        </Card>
+            <TableContainer
+                component={Paper}
+                elevation={0}
+                sx={{
+                    borderRadius: 2,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    bgcolor: theme.palette.mode === 'dark' ? '#1a2030' : '#fff',
+                }}
+            >
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell padding="checkbox">
+                                <Checkbox
+                                    indeterminate={someSelected}
+                                    checked={allSelected}
+                                    onChange={toggleAll}
+                                    size="small"
+                                />
+                            </TableCell>
+                            {['Title', 'Status', 'Priority', 'Due', 'Assignees', 'Actions'].map(col => (
+                                <TableCell
+                                    key={col}
+                                    align={col === 'Actions' ? 'right' : 'left'}
+                                    sx={{ fontWeight: 700, fontSize: 13 }}
+                                >
+                                    {col}
+                                </TableCell>
+                            ))}
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {tasks.map(task => (
+                            <TableRow
+                                key={task._id}
+                                hover
+                                selected={selected.includes(task._id)}
+                                sx={{ '&.Mui-selected': { bgcolor: 'action.selected' } }}
+                            >
+                                <TableCell padding="checkbox">
+                                    <Checkbox
+                                        checked={selected.includes(task._id)}
+                                        onChange={() => toggleOne(task._id)}
+                                        size="small"
+                                    />
+                                </TableCell>
+                                <TableCell
+                                    onClick={() => onView(task)}
+                                    sx={{ fontWeight: 600, fontSize: 14, cursor: 'pointer', maxWidth: 200 }}
+                                >
+                                    <Tooltip title="View details">
+                                        <Box sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                            {task.title}
+                                        </Box>
+                                    </Tooltip>
+                                </TableCell>
+                                <TableCell>
+                                    <Chip
+                                        label={task.status?.replace('-', ' ')}
+                                        color={STATUS_COLORS[task.status] || 'default'}
+                                        size="small"
+                                        sx={{ fontWeight: 600, textTransform: 'capitalize', fontSize: 12 }}
+                                    />
+                                </TableCell>
+                                <TableCell>
+                                    <Chip
+                                        label={task.priority}
+                                        color={PRIORITY_COLORS[task.priority]}
+                                        size="small"
+                                        sx={{ fontWeight: 600, textTransform: 'capitalize', fontSize: 12 }}
+                                    />
+                                </TableCell>
+                                <TableCell sx={{ fontSize: 13, color: 'text.secondary' }}>
+                                    {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '—'}
+                                </TableCell>
+                                <TableCell>
+                                    <Stack direction="row" spacing={0.5}>
+                                        {(task.assignedTo || []).length === 0 ? (
+                                            <Typography fontSize={12} color="text.disabled">Unassigned</Typography>
+                                        ) : (
+                                            (task.assignedTo || []).slice(0, 3).map(u => (
+                                                <Tooltip key={u._id} title={u.name || u.email}>
+                                                    <Avatar sx={{ width: 24, height: 24, fontSize: 11, background: 'linear-gradient(135deg, #6dd5ed, #2193b0)' }}>
+                                                        {(u.name || u.email || 'U')[0]}
+                                                    </Avatar>
+                                                </Tooltip>
+                                            ))
+                                        )}
+                                    </Stack>
+                                </TableCell>
+                                <TableCell align="right">
+                                    <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                                        <Tooltip title="View">
+                                            <IconButton size="small" onClick={() => onView(task)}>
+                                                <VisibilityIcon fontSize="small" color="primary" />
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title="Edit">
+                                            <IconButton size="small" onClick={() => onEdit(task)}>
+                                                <EditNoteIcon fontSize="small" color="secondary" />
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title="Archive">
+                                            <IconButton size="small" onClick={() => onArchive(task._id)}>
+                                                <ArchiveRoundedIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title="Delete">
+                                            <IconButton size="small" color="error" onClick={() => onDelete(task._id)}>
+                                                <DeleteOutlineIcon fontSize="small" />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </Stack>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </Box>
     );
 };
 

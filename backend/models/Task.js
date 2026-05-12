@@ -9,11 +9,18 @@ const taskSchema = new mongoose.Schema({
     assignedTo: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     organization: { type: String },
+    isArchived: { type: Boolean, default: false },
+    labels: [String],
     comments: [{
         user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-        comment: String,
-        createdAt: { type: Date, default: Date.now }
-    }]
+        comment: { type: String, required: true },
+        createdAt: { type: Date, default: Date.now },
+    }],
+    subtasks: [{
+        title: { type: String, required: true },
+        completed: { type: Boolean, default: false },
+        createdAt: { type: Date, default: Date.now },
+    }],
 }, { timestamps: true });
 
 module.exports = mongoose.model('Task', taskSchema);

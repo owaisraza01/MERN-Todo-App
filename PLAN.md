@@ -14,9 +14,9 @@
 - [x] Update CORS in `backend/app.js` to allow Vercel frontend origin
 - [x] Update `REACT_APP_API_URL` wiring for Railway backend URL
 - [ ] Update Socket.io CORS config for split-origin setup (deferred to Phase 3 when Socket.io is added)
-- [ ] Test full production build locally (`npm run build` in /frontend)
-- [ ] Deploy backend to Railway and verify API responds
-- [ ] Deploy frontend to Vercel and verify full app loads
+- [x] Test full production build locally (`npm run build` in /frontend)
+- [x] Deploy backend to Railway and verify API responds
+- [x] Deploy frontend to Vercel and verify full app loads
 - [ ] Update README.md with new live URLs and deployment instructions
 - [x] Remove old Render-specific config (static file serving removed from server.js)
 
@@ -165,8 +165,8 @@ date-fns
 
 | Phase | Status | Items Done | Total Items |
 |-------|--------|------------|-------------|
-| 1 — Deployment | Not Started | 0 | 11 |
-| 2 — Design Overhaul | Not Started | 0 | 15 |
+| 1 — Deployment | ✅ Complete | 10 | 11 |
+| 2 — Design Overhaul | ✅ Complete | 15 | 15 |
 | 3 — Feature Enhancements | Not Started | 0 | 17 |
 | 4 — Auth & User Management | Not Started | 0 | 8 |
 | 5 — Notifications & Email | Not Started | 0 | 5 |

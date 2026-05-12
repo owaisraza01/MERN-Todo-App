@@ -3,7 +3,7 @@ import { Box } from '@mui/material';
 import Sidebar, { SIDEBAR_WIDTH } from '../components/layout/Sidebar';
 import Topbar from '../components/layout/Topbar';
 import Dashboard from '../components/Dashboard';
-import TaskTable from '../components/TaskTable';
+import Tasks from './Tasks';
 
 const Home = ({ mode, setMode }) => {
     const [activeView, setActiveView] = useState('dashboard');
@@ -38,7 +38,7 @@ const Home = ({ mode, setMode }) => {
                 <Topbar onMenuClick={() => setMobileOpen(true)} />
                 <Box sx={{ flex: 1, p: { xs: 2, md: 3 }, overflow: 'auto' }}>
                     {activeView === 'dashboard' && <Dashboard />}
-                    {activeView === 'tasks' && <TaskTable />}
+                    {activeView === 'tasks' && <Tasks />}
                 </Box>
             </Box>
         </Box>
