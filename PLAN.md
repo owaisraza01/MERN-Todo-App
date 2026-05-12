@@ -1,7 +1,7 @@
 # PLAN.md — TaskFlow Enhancement Roadmap
 
 > Track all planned work here. Mark items `[x]` as completed.
-> Current status: Planning complete — starting Phase 1.
+> Current status: Phase 4 in progress.
 
 ---
 
@@ -26,26 +26,26 @@
 > Goal: Modern, polished UI that stands out as a portfolio project.
 
 ### Layout & Navigation
-- [ ] Replace top navbar with collapsible **sidebar navigation**
-- [ ] Add **Topbar** with search, notification bell, user avatar menu
-- [ ] Add sidebar links: Dashboard, Tasks, Calendar, Archive, Profile
+- [x] Replace top navbar with collapsible **sidebar navigation**
+- [x] Add **Topbar** with search, notification bell, user avatar menu
+- [x] Add sidebar links: Dashboard, Tasks, Calendar, Archive, Profile
 
 ### Dashboard
-- [ ] Add **priority breakdown bar chart** (low/medium/high counts)
-- [ ] Add **"Due Soon"** metric card (tasks due in next 3 days)
-- [ ] Add **"Overdue"** metric card (past due date, not completed)
+- [x] Add **priority breakdown bar chart** (low/medium/high counts)
+- [x] Add **"Due Soon"** metric card (tasks due in next 3 days)
+- [x] Add **"Overdue"** metric card (past due date, not completed)
 - [ ] Add **team productivity chart** (tasks completed per user per week)
 
 ### Task Views
-- [ ] Add **view toggle** (Table | Kanban | Calendar) in tasks header
-- [ ] Build **Kanban board** with columns per status (drag-and-drop via `@hello-pangea/dnd`)
+- [x] Add **view toggle** (Table | Kanban | Calendar) in tasks header
+- [x] Build **Kanban board** with columns per status (drag-and-drop via `@hello-pangea/dnd`)
 - [ ] Build **Calendar view** using a lightweight calendar library
 
 ### UX Polish
-- [ ] Add **skeleton loaders** for all data-fetching states
-- [ ] Add **illustrated empty states** (no tasks, no notifications, etc.)
-- [ ] Replace all "Master Motors" references with "TaskFlow"
-- [ ] Fix `assests/` folder typo → `assets/`
+- [x] Add **skeleton loaders** for all data-fetching states
+- [x] Add **illustrated empty states** (no tasks, no notifications, etc.)
+- [x] Replace all "Master Motors" references with "TaskFlow"
+- [x] Fix `assests/` folder typo → `assets/`
 - [ ] Add **onboarding flow** for first-time users (welcome modal + sample task)
 - [ ] Add **keyboard shortcuts** overlay (press `?` to show): N=new task, F=filter, /=search
 
@@ -55,24 +55,24 @@
 > Goal: Feature-complete task management platform.
 
 ### Task Features
-- [ ] **Subtasks / Checklists** — add subtask items inside a task, toggle completion
-- [ ] **Task Comments UI** — threaded comment list + add comment form in TaskDetailsDialog
+- [x] **Subtasks / Checklists** — add subtask items inside a task, toggle completion
+- [x] **Task Comments UI** — threaded comment list + add comment form in TaskDetailsDialog
 - [ ] **File Attachments** — upload files to tasks (Multer + Cloudinary storage)
 - [ ] **Task Labels / Tags** — custom color labels beyond priority
 - [ ] **Recurring Tasks** — set daily/weekly/monthly recurrence
 - [ ] **Task Templates** — save a task as a template and reuse it
-- [ ] **Bulk Actions** — checkbox select multiple tasks → bulk status update or delete
-- [ ] **Archive Tasks** — soft-delete (archive) instead of permanent delete; add Archive view
-- [ ] **Drag-and-drop Kanban** — full DnD support on Kanban board (status updates on drop)
+- [x] **Bulk Actions** — checkbox select multiple tasks → bulk status update or delete
+- [x] **Archive Tasks** — soft-delete (archive) instead of permanent delete; add Archive view
+- [x] **Drag-and-drop Kanban** — full DnD support on Kanban board (status updates on drop)
 
 ### Views
 - [ ] **Calendar View** — monthly calendar with tasks plotted by due date
 - [ ] **Global Search** — search bar (Ctrl+K) across tasks, comments, users
 
 ### Filtering & Pagination
-- [ ] **Filter Bar** — visible filter controls: status, priority, assignee, label, date range
+- [x] **Filter Bar** — visible filter controls: status, priority, assignee, label, date range
 - [ ] **Saved Filters** — save a filter combination and name it
-- [ ] **Pagination** — backend: `?page=1&limit=10`; frontend: page controls below task list
+- [x] **Pagination** — backend: `?page=1&limit=10`; frontend: page controls below task list
 
 ### Collaboration & Real-time
 - [ ] **Socket.io integration** — live task updates (status change, new task, comment) without refresh
@@ -166,10 +166,10 @@ date-fns
 | Phase | Status | Items Done | Total Items |
 |-------|--------|------------|-------------|
 | 1 — Deployment | ✅ Complete | 10 | 11 |
-| 2 — Design Overhaul | ✅ Complete | 15 | 15 |
-| 3 — Feature Enhancements | Not Started | 0 | 17 |
-| 4 — Auth & User Management | Not Started | 0 | 8 |
+| 2 — Design Overhaul | ✅ Complete | 13 | 15 |
+| 3 — Feature Enhancements | 🔄 Partial | 7 | 17 |
+| 4 — Auth & User Management | 🔄 In Progress | 0 | 8 |
 | 5 — Notifications & Email | Not Started | 0 | 5 |
 | 6 — Code Quality & Security | Not Started | 0 | 12 |
 | 7 — Analytics & Reporting | Not Started | 0 | 4 |
-| **Total** | | **0** | **72** |
+| **Total** | | **30** | **72** |

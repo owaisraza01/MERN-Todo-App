@@ -4,6 +4,7 @@ import Sidebar, { SIDEBAR_WIDTH } from '../components/layout/Sidebar';
 import Topbar from '../components/layout/Topbar';
 import Dashboard from '../components/Dashboard';
 import Tasks from './Tasks';
+import Profile from './Profile';
 
 const Home = ({ mode, setMode }) => {
     const [activeView, setActiveView] = useState('dashboard');
@@ -39,6 +40,7 @@ const Home = ({ mode, setMode }) => {
                 <Box sx={{ flex: 1, p: { xs: 2, md: 3 }, overflow: 'auto' }}>
                     {activeView === 'dashboard' && <Dashboard />}
                     {activeView === 'tasks' && <Tasks />}
+                    {activeView === 'profile' && <Profile />}
                 </Box>
             </Box>
         </Box>

@@ -5,6 +5,7 @@ import {
 } from '@mui/material';
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
 import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
+import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import ThemeToggle from '../ThemeToggle';
 import logo from '../../assests/images/logo.png';
@@ -14,6 +15,7 @@ export const SIDEBAR_WIDTH = 260;
 const NAV_ITEMS = [
     { label: 'Dashboard', icon: <DashboardRoundedIcon />, view: 'dashboard' },
     { label: 'Tasks', icon: <AssignmentRoundedIcon />, view: 'tasks' },
+    { label: 'Profile', icon: <AccountCircleRoundedIcon />, view: 'profile' },
 ];
 
 const getUserFromToken = () => {

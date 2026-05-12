@@ -153,9 +153,16 @@ const Login = () => {
                         </Button>
                         <Button
                             fullWidth
+                            onClick={() => nav('/forgot-password')}
+                            sx={{ mt: 1.5, borderRadius: 2, fontWeight: 600, textTransform: 'none', color: 'text.secondary', fontSize: 13 }}
+                        >
+                            Forgot password?
+                        </Button>
+                        <Button
+                            fullWidth
                             onClick={() => nav('/register')}
                             sx={{
-                                mt: 2,
+                                mt: 1,
                                 borderRadius: 2,
                                 fontWeight: 600,
                                 textTransform: 'none',
