@@ -9,16 +9,11 @@ import LockRoundedIcon from '@mui/icons-material/LockRounded';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-
-const getUserFromToken = () => {
-    const token = localStorage.getItem('token');
-    if (!token) return null;
-    try { return JSON.parse(atob(token.split('.')[1])); } catch { return null; }
-};
+import { useAuth } from '../hooks/useAuth';
 
 const Profile = () => {
     const theme = useTheme();
-    const tokenUser = getUserFromToken();
+    const { user: tokenUser, authHeader } = useAuth();
 
     const [name, setName] = useState(tokenUser?.name || '');
     const [currentPassword, setCurrentPassword] = useState('');
@@ -28,8 +23,6 @@ const Profile = () => {
     const [savingProfile, setSavingProfile] = useState(false);
     const [savingPassword, setSavingPassword] = useState(false);
 
-    const token = () => localStorage.getItem('token');
-    const headers = () => ({ Authorization: `Bearer ${token()}` });
 
     const inputBg = theme.palette.mode === 'dark' ? 'rgba(44,62,80,0.5)' : '#f8fbff';
 
@@ -38,7 +31,7 @@ const Profile = () => {
         if (!name.trim()) return;
         setSavingProfile(true);
         try {
-            await axios.put('/api/users/profile', { name }, { headers: headers() });
+            await axios.put('/api/users/profile', { name }, { headers: authHeader });
             toast.success('Profile updated');
         } catch (err) {
             toast.error(err.response?.data?.message || 'Failed to update profile');
@@ -53,7 +46,7 @@ const Profile = () => {
         if (newPassword.length < 6) { toast.error('Password must be at least 6 characters'); return; }
         setSavingPassword(true);
         try {
-            await axios.put('/api/users/profile', { currentPassword, newPassword }, { headers: headers() });
+            await axios.put('/api/users/profile', { currentPassword, newPassword }, { headers: authHeader });
             toast.success('Password changed');
             setCurrentPassword('');
             setNewPassword('');

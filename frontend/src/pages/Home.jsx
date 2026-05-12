@@ -5,22 +5,19 @@ import Topbar from '../components/layout/Topbar';
 import Dashboard from '../components/Dashboard';
 import Tasks from './Tasks';
 import Profile from './Profile';
+import { useAuth } from '../hooks/useAuth';
 
 const Home = ({ mode, setMode }) => {
     const [activeView, setActiveView] = useState('dashboard');
     const [mobileOpen, setMobileOpen] = useState(false);
-
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        window.location.href = '/login';
-    };
+    const { logout } = useAuth();
 
     return (
         <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
             <Sidebar
                 mode={mode}
                 setMode={setMode}
-                onLogout={handleLogout}
+                onLogout={logout}
                 activeView={activeView}
                 setActiveView={setActiveView}
                 mobileOpen={mobileOpen}

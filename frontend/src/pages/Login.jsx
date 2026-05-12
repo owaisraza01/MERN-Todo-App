@@ -7,6 +7,7 @@ import { Visibility, VisibilityOff, Login as LoginIcon } from '@mui/icons-materi
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useAuth } from '../hooks/useAuth';
 import loginArt from '../assests/images/LoginPage.png';
 
 const Login = () => {
@@ -16,6 +17,7 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     const nav = useNavigate();
     const theme = useTheme();
+    const { login } = useAuth();
 
     const glassBg = theme.palette.mode === 'dark'
         ? 'linear-gradient(120deg, #232526 0%, #414345 100%)'
@@ -30,10 +32,10 @@ const Login = () => {
         setLoading(true);
         try {
             const { data } = await axios.post('/api/auth/login', { email, password });
-            localStorage.setItem('token', data.token);
+            login(data.token);
             window.location.href = '/';
         } catch (err) {
-            toast.error(err.response?.data?.msg || 'Login failed');
+            toast.error(err.response?.data?.message || 'Login failed');
         } finally {
             setLoading(false);
         }
@@ -161,13 +163,7 @@ const Login = () => {
                         <Button
                             fullWidth
                             onClick={() => nav('/register')}
-                            sx={{
-                                mt: 1,
-                                borderRadius: 2,
-                                fontWeight: 600,
-                                textTransform: 'none',
-                                color: 'primary.main',
-                            }}
+                            sx={{ mt: 1, borderRadius: 2, fontWeight: 600, textTransform: 'none', color: 'primary.main' }}
                         >
                             Don't have an account?{' '}
                             <Box component="span" sx={{ fontWeight: 800, ml: 0.5 }}>Register</Box>

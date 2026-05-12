@@ -8,6 +8,7 @@ import TableRowsRoundedIcon from '@mui/icons-material/TableRowsRounded';
 import ViewKanbanRoundedIcon from '@mui/icons-material/ViewKanbanRounded';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useAuth } from '../hooks/useAuth';
 import TaskTable from '../components/TaskTable';
 import TaskKanban from '../components/tasks/TaskKanban';
 import TaskFilterBar from '../components/tasks/TaskFilterBar';
@@ -29,8 +30,7 @@ const Tasks = () => {
     const [editTask, setEditTask] = useState(null);
     const [detailsTask, setDetailsTask] = useState(null);
 
-    const token = () => localStorage.getItem('token');
-    const headers = () => ({ Authorization: `Bearer ${token()}` });
+    const { authHeader } = useAuth();
 
     const fetchTasks = useCallback(async () => {
         setLoading(true);
@@ -45,7 +45,7 @@ const Tasks = () => {
                 params.limit = LIMIT;
             }
 
-            const { data } = await axios.get('/api/tasks', { headers: headers(), params });
+            const { data } = await axios.get('/api/tasks', { headers: authHeader, params });
 
             if (data.tasks) {
                 setTasks(data.tasks);
@@ -65,7 +65,7 @@ const Tasks = () => {
     }, [fetchTasks]);
 
     useEffect(() => {
-        axios.get('/api/users', { headers: headers() })
+        axios.get('/api/users', { headers: authHeader })
             .then(r => setUsers(Array.isArray(r.data) ? r.data : r.data.users || []))
             .catch(() => {});
     }, []);
@@ -87,7 +87,7 @@ const Tasks = () => {
     const handleDelete = async (id) => {
         if (!window.confirm('Delete this task?')) return;
         try {
-            await axios.delete(`/api/tasks/${id}`, { headers: headers() });
+            await axios.delete(`/api/tasks/${id}`, { headers: authHeader });
             toast.success('Task deleted');
             setSelected(s => s.filter(sid => sid !== id));
             fetchTasks();
@@ -98,7 +98,7 @@ const Tasks = () => {
 
     const handleArchive = async (id) => {
         try {
-            await axios.patch(`/api/tasks/${id}/archive`, {}, { headers: headers() });
+            await axios.patch(`/api/tasks/${id}/archive`, {}, { headers: authHeader });
             toast.success('Task archived');
             fetchTasks();
         } catch {
@@ -109,7 +109,7 @@ const Tasks = () => {
     const handleBulkDelete = async () => {
         if (!window.confirm(`Delete ${selected.length} tasks?`)) return;
         try {
-            await axios.post('/api/tasks/bulk-delete', { ids: selected }, { headers: headers() });
+            await axios.post('/api/tasks/bulk-delete', { ids: selected }, { headers: authHeader });
             toast.success(`${selected.length} tasks deleted`);
             setSelected([]);
             fetchTasks();
@@ -123,7 +123,7 @@ const Tasks = () => {
         if (!task || task.status === newStatus) return;
         setTasks(prev => prev.map(t => t._id === taskId ? { ...t, status: newStatus } : t));
         try {
-            await axios.put(`/api/tasks/${taskId}`, { ...task, status: newStatus }, { headers: headers() });
+            await axios.put(`/api/tasks/${taskId}`, { ...task, status: newStatus }, { headers: authHeader });
             toast.success('Task moved');
         } catch {
             toast.error('Failed to update task');

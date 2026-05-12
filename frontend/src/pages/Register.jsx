@@ -5,6 +5,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useAuth } from '../hooks/useAuth';
 import registerArt from '../assests/images/RegisterPage.png';
 
 const Register = () => {
@@ -12,6 +13,7 @@ const Register = () => {
     const [loading, setLoading] = useState(false);
     const nav = useNavigate();
     const theme = useTheme();
+    const { login } = useAuth();
 
     const glassBg = theme.palette.mode === 'dark'
         ? 'linear-gradient(120deg, #232526 0%, #414345 100%)'
@@ -21,15 +23,15 @@ const Register = () => {
 
     const handleSubmit = async e => {
         e.preventDefault();
-        if (form.password.length < 3) { toast.error('Password must be at least 3 characters'); return; }
+        if (form.password.length < 6) { toast.error('Password must be at least 6 characters'); return; }
         setLoading(true);
         try {
             const { data } = await axios.post('/api/auth/register', form);
-            localStorage.setItem('token', data.token);
+            login(data.token);
             toast.success('Account created!');
             window.location.href = '/';
         } catch (err) {
-            toast.error(err.response?.data?.msg || 'Registration failed');
+            toast.error(err.response?.data?.message || 'Registration failed');
         } finally {
             setLoading(false);
         }
@@ -102,7 +104,7 @@ const Register = () => {
                         {[
                             { label: 'Full Name', key: 'name', type: 'text', placeholder: 'Your full name' },
                             { label: 'Email', key: 'email', type: 'email', placeholder: 'you@example.com' },
-                            { label: 'Password', key: 'password', type: 'password', placeholder: 'Create a password' },
+                            { label: 'Password (min 6 chars)', key: 'password', type: 'password', placeholder: 'Create a password' },
                         ].map(field => (
                             <TextField
                                 key={field.key}
@@ -139,13 +141,7 @@ const Register = () => {
                         <Button
                             fullWidth
                             onClick={() => nav('/login')}
-                            sx={{
-                                mt: 2,
-                                borderRadius: 2,
-                                fontWeight: 600,
-                                textTransform: 'none',
-                                color: 'primary.main',
-                            }}
+                            sx={{ mt: 2, borderRadius: 2, fontWeight: 600, textTransform: 'none', color: 'primary.main' }}
                         >
                             Already have an account?{' '}
                             <Box component="span" sx={{ fontWeight: 800, ml: 0.5 }}>Sign In</Box>

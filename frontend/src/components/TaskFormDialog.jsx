@@ -10,6 +10,7 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useAuth } from '../hooks/useAuth';
 
 const priorities = [
     { label: 'Low', value: 'low', color: 'default' },
@@ -30,6 +31,7 @@ const TaskFormDialog = ({ open, onClose, editTask }) => {
     const [users, setUsers] = useState([]);
     const [saving, setSaving] = useState(false);
     const theme = useTheme();
+    const { authHeader } = useAuth();
 
     useEffect(() => {
         if (editTask) {
@@ -42,8 +44,7 @@ const TaskFormDialog = ({ open, onClose, editTask }) => {
             setForm(EMPTY_FORM);
         }
 
-        const token = localStorage.getItem('token');
-        axios.get('/api/users', { headers: { Authorization: `Bearer ${token}` } })
+        axios.get('/api/users', { headers: authHeader })
             .then(res => setUsers(Array.isArray(res.data) ? res.data : res.data.users || []))
             .catch(() => setUsers([]));
     }, [open, editTask]);
@@ -57,17 +58,12 @@ const TaskFormDialog = ({ open, onClose, editTask }) => {
         e.preventDefault();
         if (!form.title.trim()) { toast.error('Title is required'); return; }
         setSaving(true);
-        const token = localStorage.getItem('token');
         try {
             if (editTask) {
-                await axios.put(`/api/tasks/${editTask._id}`, form, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+                await axios.put(`/api/tasks/${editTask._id}`, form, { headers: authHeader });
                 toast.success('Task updated');
             } else {
-                await axios.post('/api/tasks', form, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+                await axios.post('/api/tasks', form, { headers: authHeader });
                 toast.success('Task created');
             }
             onClose(true);

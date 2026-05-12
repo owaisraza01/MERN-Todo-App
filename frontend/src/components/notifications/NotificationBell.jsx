@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
     IconButton, Badge, Popover, Box, Typography, List, ListItem,
     ListItemText, Divider, Button, Chip, CircularProgress, useTheme,
@@ -6,7 +6,7 @@ import {
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
 import NotificationsNoneRoundedIcon from '@mui/icons-material/NotificationsNoneRounded';
 import DoneAllRoundedIcon from '@mui/icons-material/DoneAllRounded';
-import axios from 'axios';
+import { useNotifications } from '../../hooks/useNotifications';
 
 const TYPE_COLORS = {
     task_assigned: 'primary',
@@ -24,57 +24,22 @@ const timeAgo = (date) => {
 
 const NotificationBell = () => {
     const theme = useTheme();
-    const [notifications, setNotifications] = useState([]);
-    const [loading, setLoading] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
-
-    const token = () => localStorage.getItem('token');
-    const headers = () => ({ Authorization: `Bearer ${token()}` });
-
-    const fetchNotifications = useCallback(async () => {
-        if (!token()) return;
-        try {
-            const { data } = await axios.get('/api/notifications', { headers: headers() });
-            setNotifications(data);
-        } catch { }
-    }, []);
-
-    useEffect(() => {
-        fetchNotifications();
-        const interval = setInterval(fetchNotifications, 30000);
-        return () => clearInterval(interval);
-    }, [fetchNotifications]);
+    const { notifications, loading, refresh, markRead, markAllRead } = useNotifications();
 
     const open = Boolean(anchorEl);
     const unreadCount = notifications.filter(n => !n.read).length;
 
     const handleOpen = async (e) => {
         setAnchorEl(e.currentTarget);
-        setLoading(true);
-        await fetchNotifications();
-        setLoading(false);
-    };
-
-    const handleClose = () => setAnchorEl(null);
-
-    const handleMarkRead = async (id) => {
-        setNotifications(prev => prev.map(n => n._id === id ? { ...n, read: true } : n));
-        await axios.put(`/api/notifications/${id}/read`, {}, { headers: headers() }).catch(() => {});
-    };
-
-    const handleMarkAllRead = async () => {
-        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-        await axios.put('/api/notifications/read-all', {}, { headers: headers() }).catch(() => {});
+        await refresh();
     };
 
     return (
         <>
             <IconButton
                 onClick={handleOpen}
-                sx={{
-                    color: open ? 'primary.main' : 'text.secondary',
-                    transition: 'color 0.2s',
-                }}
+                sx={{ color: open ? 'primary.main' : 'text.secondary', transition: 'color 0.2s' }}
             >
                 <Badge badgeContent={unreadCount} color="error" max={9}>
                     {unreadCount > 0
@@ -87,7 +52,7 @@ const NotificationBell = () => {
             <Popover
                 open={open}
                 anchorEl={anchorEl}
-                onClose={handleClose}
+                onClose={() => setAnchorEl(null)}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                 transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                 PaperProps={{
@@ -114,7 +79,7 @@ const NotificationBell = () => {
                         <Button
                             size="small"
                             startIcon={<DoneAllRoundedIcon />}
-                            onClick={handleMarkAllRead}
+                            onClick={markAllRead}
                             sx={{ textTransform: 'none', fontWeight: 600, fontSize: 12 }}
                         >
                             Mark all read
@@ -131,9 +96,7 @@ const NotificationBell = () => {
                 ) : notifications.length === 0 ? (
                     <Box py={5} textAlign="center">
                         <NotificationsNoneRoundedIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
-                        <Typography variant="body2" color="text.disabled">
-                            No notifications yet
-                        </Typography>
+                        <Typography variant="body2" color="text.disabled">No notifications yet</Typography>
                     </Box>
                 ) : (
                     <List disablePadding sx={{ maxHeight: 380, overflowY: 'auto' }}>
@@ -141,7 +104,7 @@ const NotificationBell = () => {
                             <React.Fragment key={n._id}>
                                 <ListItem
                                     alignItems="flex-start"
-                                    onClick={() => handleMarkRead(n._id)}
+                                    onClick={() => markRead(n._id)}
                                     sx={{
                                         cursor: 'pointer',
                                         px: 2.5,
@@ -157,16 +120,7 @@ const NotificationBell = () => {
                                 >
                                     <Box sx={{ display: 'flex', gap: 1.5, width: '100%' }}>
                                         {!n.read && (
-                                            <Box
-                                                sx={{
-                                                    width: 8,
-                                                    height: 8,
-                                                    borderRadius: '50%',
-                                                    bgcolor: 'primary.main',
-                                                    flexShrink: 0,
-                                                    mt: 0.75,
-                                                }}
-                                            />
+                                            <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'primary.main', flexShrink: 0, mt: 0.75 }} />
                                         )}
                                         <Box sx={{ flex: 1, ml: n.read ? 2 : 0 }}>
                                             <ListItemText

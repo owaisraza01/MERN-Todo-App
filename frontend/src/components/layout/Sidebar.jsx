@@ -1,7 +1,7 @@
 import React from 'react';
 import {
     Box, Drawer, List, ListItem, ListItemButton, ListItemIcon,
-    ListItemText, Typography, Divider, Avatar, Tooltip, useTheme,
+    ListItemText, Typography, Divider, Tooltip, useTheme,
 } from '@mui/material';
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
 import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
@@ -9,7 +9,9 @@ import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import ThemeToggle from '../ThemeToggle';
 import NotificationBell from '../notifications/NotificationBell';
+import { useAuth } from '../../hooks/useAuth';
 import logo from '../../assests/images/logo.png';
+import { Avatar } from '@mui/material';
 
 export const SIDEBAR_WIDTH = 260;
 
@@ -19,19 +21,9 @@ const NAV_ITEMS = [
     { label: 'Profile', icon: <AccountCircleRoundedIcon />, view: 'profile' },
 ];
 
-const getUserFromToken = () => {
-    const token = localStorage.getItem('token');
-    if (!token) return null;
-    try {
-        return JSON.parse(atob(token.split('.')[1]));
-    } catch {
-        return null;
-    }
-};
-
 const SidebarContent = ({ activeView, setActiveView, onLogout, mode, setMode }) => {
     const theme = useTheme();
-    const user = getUserFromToken();
+    const { user } = useAuth();
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
@@ -82,12 +74,7 @@ const SidebarContent = ({ activeView, setActiveView, onLogout, mode, setMode }) 
                                     },
                                 }}
                             >
-                                <ListItemIcon
-                                    sx={{
-                                        minWidth: 42,
-                                        color: isActive ? 'primary.main' : 'text.secondary',
-                                    }}
-                                >
+                                <ListItemIcon sx={{ minWidth: 42, color: isActive ? 'primary.main' : 'text.secondary' }}>
                                     {item.icon}
                                 </ListItemIcon>
                                 <ListItemText
@@ -100,9 +87,7 @@ const SidebarContent = ({ activeView, setActiveView, onLogout, mode, setMode }) 
                                 />
                                 {isActive && (
                                     <Box sx={{
-                                        width: 4,
-                                        height: 24,
-                                        borderRadius: 2,
+                                        width: 4, height: 24, borderRadius: 2,
                                         background: 'linear-gradient(180deg, #6dd5ed, #2193b0)',
                                         flexShrink: 0,
                                     }} />
@@ -117,24 +102,12 @@ const SidebarContent = ({ activeView, setActiveView, onLogout, mode, setMode }) 
 
             {user && (
                 <Box sx={{ px: 2.5, py: 1.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                    <Avatar
-                        sx={{
-                            width: 34,
-                            height: 34,
-                            fontSize: 14,
-                            fontWeight: 700,
-                            background: 'linear-gradient(135deg, #6dd5ed, #2193b0)',
-                        }}
-                    >
+                    <Avatar sx={{ width: 34, height: 34, fontSize: 14, fontWeight: 700, background: 'linear-gradient(135deg, #6dd5ed, #2193b0)' }}>
                         {(user.name || user.email || 'U')[0].toUpperCase()}
                     </Avatar>
                     <Box sx={{ overflow: 'hidden', flex: 1 }}>
-                        <Typography fontSize={13} fontWeight={700} noWrap>
-                            {user.name || 'User'}
-                        </Typography>
-                        <Typography fontSize={11} color="text.secondary" noWrap>
-                            {user.email || ''}
-                        </Typography>
+                        <Typography fontSize={13} fontWeight={700} noWrap>{user.name || 'User'}</Typography>
+                        <Typography fontSize={11} color="text.secondary" noWrap>{user.email || ''}</Typography>
                     </Box>
                 </Box>
             )}

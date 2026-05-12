@@ -13,6 +13,7 @@ import ChecklistRoundedIcon from '@mui/icons-material/ChecklistRounded';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useAuth } from '../hooks/useAuth';
 
 const STATUS_COLORS = { pending: 'warning', 'in-progress': 'info', completed: 'success' };
 const PRIORITY_COLORS = { low: 'default', medium: 'warning', high: 'error' };
@@ -26,15 +27,14 @@ const TaskDetailsDialog = ({ task, onClose, onRefresh }) => {
     const [newSubtask, setNewSubtask] = useState('');
     const [addingSubtask, setAddingSubtask] = useState(false);
 
-    const token = () => localStorage.getItem('token');
-    const headers = () => ({ Authorization: `Bearer ${token()}` });
+    const { authHeader } = useAuth();
 
     useEffect(() => {
         if (!task) { setFullTask(null); return; }
         const fetch = async () => {
             setLoading(true);
             try {
-                const { data } = await axios.get(`/api/tasks/${task._id}`, { headers: headers() });
+                const { data } = await axios.get(`/api/tasks/${task._id}`, { headers: authHeader });
                 setFullTask(data);
             } catch {
                 setFullTask(task);
@@ -48,7 +48,7 @@ const TaskDetailsDialog = ({ task, onClose, onRefresh }) => {
     }, [task]);
 
     const refreshTask = async () => {
-        const { data } = await axios.get(`/api/tasks/${task._id}`, { headers: headers() });
+        const { data } = await axios.get(`/api/tasks/${task._id}`, { headers: authHeader });
         setFullTask(data);
     };
 
@@ -56,7 +56,7 @@ const TaskDetailsDialog = ({ task, onClose, onRefresh }) => {
         if (!comment.trim()) return;
         setSubmittingComment(true);
         try {
-            await axios.post(`/api/tasks/${task._id}/comments`, { comment }, { headers: headers() });
+            await axios.post(`/api/tasks/${task._id}/comments`, { comment }, { headers: authHeader });
             toast.success('Comment added');
             setComment('');
             await refreshTask();
@@ -71,7 +71,7 @@ const TaskDetailsDialog = ({ task, onClose, onRefresh }) => {
         if (!newSubtask.trim()) return;
         setAddingSubtask(true);
         try {
-            await axios.post(`/api/tasks/${task._id}/subtasks`, { title: newSubtask }, { headers: headers() });
+            await axios.post(`/api/tasks/${task._id}/subtasks`, { title: newSubtask }, { headers: authHeader });
             toast.success('Subtask added');
             setNewSubtask('');
             await refreshTask();
@@ -84,7 +84,7 @@ const TaskDetailsDialog = ({ task, onClose, onRefresh }) => {
 
     const handleToggleSubtask = async (sid) => {
         try {
-            await axios.patch(`/api/tasks/${task._id}/subtasks/${sid}`, {}, { headers: headers() });
+            await axios.patch(`/api/tasks/${task._id}/subtasks/${sid}`, {}, { headers: authHeader });
             await refreshTask();
         } catch {
             toast.error('Failed to update subtask');
