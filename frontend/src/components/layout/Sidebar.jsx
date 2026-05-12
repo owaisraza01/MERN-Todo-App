@@ -8,6 +8,7 @@ import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
 import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import ThemeToggle from '../ThemeToggle';
+import NotificationBell from '../notifications/NotificationBell';
 import logo from '../../assests/images/logo.png';
 
 export const SIDEBAR_WIDTH = 260;
@@ -140,6 +141,7 @@ const SidebarContent = ({ activeView, setActiveView, onLogout, mode, setMode }) 
 
             <Box sx={{ px: 1.5, pb: 2.5, display: 'flex', alignItems: 'center', gap: 1 }}>
                 <ThemeToggle mode={mode} setMode={setMode} />
+                <NotificationBell />
                 <Tooltip title="Logout">
                     <ListItemButton
                         onClick={onLogout}

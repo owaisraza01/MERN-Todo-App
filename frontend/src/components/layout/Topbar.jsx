@@ -1,6 +1,7 @@
 import React from 'react';
-import { AppBar, Toolbar, IconButton, Typography, useTheme } from '@mui/material';
+import { AppBar, Toolbar, IconButton, Typography, Box, useTheme } from '@mui/material';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
+import NotificationBell from '../notifications/NotificationBell';
 
 const Topbar = ({ onMenuClick }) => {
     const theme = useTheme();
@@ -24,10 +25,11 @@ const Topbar = ({ onMenuClick }) => {
                     variant="h6"
                     fontWeight={900}
                     color="primary"
-                    sx={{ letterSpacing: -0.5, fontFamily: '"Inter", sans-serif' }}
+                    sx={{ letterSpacing: -0.5, fontFamily: '"Inter", sans-serif', flex: 1 }}
                 >
                     TaskFlow
                 </Typography>
+                <NotificationBell />
             </Toolbar>
         </AppBar>
     );
