@@ -1,37 +1,62 @@
 import React, { useEffect, useState } from 'react';
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button,
-    Stack, Chip, Box, Avatar, Divider, useTheme, TextField, IconButton,
-    LinearProgress, Checkbox, FormControlLabel, CircularProgress,
+    Box, Avatar, Divider, useTheme, TextField, IconButton,
+    LinearProgress, Checkbox, CircularProgress, Stack,
 } from '@mui/material';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import FlagIcon from '@mui/icons-material/Flag';
-import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
-import ChecklistRoundedIcon from '@mui/icons-material/ChecklistRounded';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
 
-const STATUS_COLORS = { pending: 'warning', 'in-progress': 'info', completed: 'success' };
-const PRIORITY_COLORS = { low: 'default', medium: 'warning', high: 'error' };
+const STATUS_META = {
+    pending:     { label: 'Pending',     color: '#f59e0b' },
+    'in-progress': { label: 'In Progress', color: '#6366f1' },
+    completed:   { label: 'Completed',   color: '#10b981' },
+};
+const PRIORITY_META = {
+    low:    { label: 'Low',    color: '#10b981' },
+    medium: { label: 'Medium', color: '#f59e0b' },
+    high:   { label: 'High',   color: '#ef4444' },
+};
+
+const MetaBadge = ({ color, label }) => (
+    <Box
+        sx={{
+            px: 0.875,
+            py: 0.25,
+            borderRadius: 0.75,
+            fontSize: 11,
+            fontWeight: 600,
+            letterSpacing: '0.03em',
+            color,
+            bgcolor: `${color}18`,
+            textTransform: 'capitalize',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 0.5,
+        }}
+    >
+        <Box sx={{ width: 5, height: 5, borderRadius: '50%', bgcolor: color }} />
+        {label}
+    </Box>
+);
 
 const TaskDetailsDialog = ({ task, onClose, onRefresh }) => {
     const theme = useTheme();
+    const dark = theme.palette.mode === 'dark';
     const [fullTask, setFullTask] = useState(null);
     const [loading, setLoading] = useState(false);
     const [comment, setComment] = useState('');
     const [submittingComment, setSubmittingComment] = useState(false);
     const [newSubtask, setNewSubtask] = useState('');
     const [addingSubtask, setAddingSubtask] = useState(false);
-
     const { authHeader } = useAuth();
 
     useEffect(() => {
         if (!task) { setFullTask(null); return; }
-        const fetch = async () => {
+        const load = async () => {
             setLoading(true);
             try {
                 const { data } = await axios.get(`/api/tasks/${task._id}`, { headers: authHeader });
@@ -42,7 +67,7 @@ const TaskDetailsDialog = ({ task, onClose, onRefresh }) => {
                 setLoading(false);
             }
         };
-        fetch();
+        load();
         setComment('');
         setNewSubtask('');
     }, [task]);
@@ -94,11 +119,11 @@ const TaskDetailsDialog = ({ task, onClose, onRefresh }) => {
     if (!task) return null;
 
     const t = fullTask || task;
-    const completedSubtasks = (t.subtasks || []).filter(s => s.completed).length;
-    const totalSubtasks = (t.subtasks || []).length;
-    const subtaskProgress = totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0;
-
-    const inputBg = theme.palette.mode === 'dark' ? 'rgba(44,62,80,0.5)' : '#f8fbff';
+    const completedSubs = (t.subtasks || []).filter(s => s.completed).length;
+    const totalSubs = (t.subtasks || []).length;
+    const subtaskPct = totalSubs > 0 ? (completedSubs / totalSubs) * 100 : 0;
+    const statusMeta = STATUS_META[t.status] || { label: t.status, color: '#64748b' };
+    const priorityMeta = PRIORITY_META[t.priority] || { label: t.priority, color: '#64748b' };
 
     return (
         <Dialog
@@ -108,56 +133,85 @@ const TaskDetailsDialog = ({ task, onClose, onRefresh }) => {
             maxWidth="sm"
             PaperProps={{
                 sx: {
-                    borderRadius: 3,
-                    background: theme.palette.mode === 'dark' ? '#1e2533' : '#ffffff',
+                    borderRadius: 1.5,
+                    bgcolor: dark ? '#0d1424' : '#fff',
+                    backgroundImage: 'none',
+                    border: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(15,23,42,0.1)'}`,
                     maxHeight: '90vh',
                 },
             }}
         >
-            <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: 800, color: 'primary.main' }}>
-                <InfoOutlinedIcon />
-                Task Details
+            <DialogTitle sx={{ px: 3, pt: 3, pb: 0 }}>
+                <Typography fontSize={14} fontWeight={700} letterSpacing="0.04em" color="text.secondary">
+                    TASK DETAILS
+                </Typography>
             </DialogTitle>
 
-            <DialogContent dividers sx={{ px: 3, py: 2 }}>
-                {loading && <LinearProgress sx={{ mb: 2, borderRadius: 1 }} />}
+            <DialogContent sx={{ px: 3, py: 2 }}>
+                {loading && (
+                    <LinearProgress sx={{ mb: 2, borderRadius: 0.5, height: 2 }} />
+                )}
 
                 <Stack spacing={2.5}>
+                    {/* Title + description */}
                     <Box>
-                        <Typography variant="h6" fontWeight={800} sx={{ mb: 1 }}>{t.title}</Typography>
+                        <Typography fontSize={16} fontWeight={700} lineHeight={1.4} mb={1}>
+                            {t.title}
+                        </Typography>
                         {t.description && (
                             <Typography
-                                fontSize={14}
+                                fontSize={13}
                                 color="text.secondary"
-                                sx={{ p: 1.5, borderRadius: 2, bgcolor: inputBg }}
+                                lineHeight={1.6}
+                                sx={{
+                                    p: 1.5,
+                                    borderRadius: 1,
+                                    border: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.06)'}`,
+                                }}
                             >
                                 {t.description}
                             </Typography>
                         )}
                     </Box>
 
-                    <Stack direction="row" spacing={1} flexWrap="wrap">
-                        <Chip icon={<FlagIcon />} label={t.priority} color={PRIORITY_COLORS[t.priority] || 'default'} size="small" sx={{ fontWeight: 600, textTransform: 'capitalize' }} />
-                        <Chip icon={<AssignmentIndIcon />} label={t.status?.replace('-', ' ')} color={STATUS_COLORS[t.status] || 'default'} size="small" sx={{ fontWeight: 600, textTransform: 'capitalize' }} />
-                        {t.dueDate && <Chip icon={<AccessTimeIcon />} label={new Date(t.dueDate).toLocaleDateString()} color="info" size="small" sx={{ fontWeight: 600 }} />}
-                    </Stack>
+                    {/* Meta badges */}
+                    <Box display="flex" gap={1} flexWrap="wrap" alignItems="center">
+                        <MetaBadge color={statusMeta.color} label={statusMeta.label} />
+                        <MetaBadge color={priorityMeta.color} label={priorityMeta.label} />
+                        {t.dueDate && (
+                            <Box sx={{ fontSize: 11, fontWeight: 500, color: 'text.secondary', fontVariantNumeric: 'tabular-nums' }}>
+                                Due {new Date(t.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            </Box>
+                        )}
+                    </Box>
 
+                    {/* Assignees */}
                     {(t.assignedTo || []).length > 0 && (
                         <Box>
-                            <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                            <Typography fontSize={11} fontWeight={700} letterSpacing="0.06em" color="text.disabled" mb={1}>
                                 ASSIGNEES
                             </Typography>
-                            <Stack direction="row" spacing={1} flexWrap="wrap">
+                            <Box display="flex" gap={1} flexWrap="wrap">
                                 {t.assignedTo.map(u => (
-                                    <Chip
+                                    <Box
                                         key={u._id}
-                                        avatar={<Avatar>{(u.name || u.email || 'U')[0]}</Avatar>}
-                                        label={u.name || u.email}
-                                        size="small"
-                                        sx={{ fontWeight: 500 }}
-                                    />
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 0.75,
+                                            px: 1,
+                                            py: 0.5,
+                                            borderRadius: 1,
+                                            border: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.08)'}`,
+                                        }}
+                                    >
+                                        <Avatar sx={{ width: 18, height: 18, fontSize: 9, bgcolor: '#6366f1' }}>
+                                            {(u.name || u.email || 'U')[0]}
+                                        </Avatar>
+                                        <Typography fontSize={12}>{u.name || u.email}</Typography>
+                                    </Box>
                                 ))}
-                            </Stack>
+                            </Box>
                         </Box>
                     )}
 
@@ -165,47 +219,61 @@ const TaskDetailsDialog = ({ task, onClose, onRefresh }) => {
 
                     {/* Subtasks */}
                     <Box>
-                        <Box display="flex" alignItems="center" gap={1} mb={1.5}>
-                            <ChecklistRoundedIcon fontSize="small" color="primary" />
-                            <Typography variant="subtitle2" fontWeight={700}>
-                                Subtasks
+                        <Box display="flex" alignItems="center" justifyContent="space-between" mb={1.5}>
+                            <Typography fontSize={11} fontWeight={700} letterSpacing="0.06em" color="text.disabled">
+                                SUBTASKS
                             </Typography>
-                            {totalSubtasks > 0 && (
-                                <Typography variant="caption" color="text.secondary">
-                                    {completedSubtasks}/{totalSubtasks}
+                            {totalSubs > 0 && (
+                                <Typography fontSize={11} color="text.disabled" fontVariantNumeric="tabular-nums">
+                                    {completedSubs}/{totalSubs}
                                 </Typography>
                             )}
                         </Box>
 
-                        {totalSubtasks > 0 && (
-                            <LinearProgress
-                                variant="determinate"
-                                value={subtaskProgress}
-                                sx={{ mb: 1.5, borderRadius: 1, height: 6 }}
-                                color={subtaskProgress === 100 ? 'success' : 'primary'}
-                            />
+                        {totalSubs > 0 && (
+                            <Box sx={{ mb: 1.5, height: 3, borderRadius: 1, bgcolor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.06)', overflow: 'hidden' }}>
+                                <Box
+                                    sx={{
+                                        height: '100%',
+                                        width: `${subtaskPct}%`,
+                                        bgcolor: subtaskPct === 100 ? '#10b981' : '#6366f1',
+                                        borderRadius: 1,
+                                        transition: 'width 0.3s ease',
+                                    }}
+                                />
+                            </Box>
                         )}
 
-                        <Stack spacing={0.5} mb={1.5}>
+                        <Stack spacing={0.25} mb={1.5}>
                             {(t.subtasks || []).map(s => (
-                                <FormControlLabel
+                                <Box
                                     key={s._id}
-                                    control={
-                                        <Checkbox
-                                            checked={s.completed}
-                                            onChange={() => handleToggleSubtask(s._id)}
-                                            size="small"
-                                        />
-                                    }
-                                    label={
-                                        <Typography
-                                            fontSize={14}
-                                            sx={{ textDecoration: s.completed ? 'line-through' : 'none', color: s.completed ? 'text.disabled' : 'text.primary' }}
-                                        >
-                                            {s.title}
-                                        </Typography>
-                                    }
-                                />
+                                    display="flex"
+                                    alignItems="center"
+                                    gap={1}
+                                    sx={{
+                                        px: 0.5,
+                                        py: 0.25,
+                                        borderRadius: 0.75,
+                                        '&:hover': { bgcolor: dark ? 'rgba(255,255,255,0.02)' : 'rgba(15,23,42,0.02)' },
+                                    }}
+                                >
+                                    <Checkbox
+                                        checked={s.completed}
+                                        onChange={() => handleToggleSubtask(s._id)}
+                                        size="small"
+                                        sx={{ p: 0.25, color: 'text.disabled', '&.Mui-checked': { color: '#6366f1' } }}
+                                    />
+                                    <Typography
+                                        fontSize={13}
+                                        sx={{
+                                            textDecoration: s.completed ? 'line-through' : 'none',
+                                            color: s.completed ? 'text.disabled' : 'text.primary',
+                                        }}
+                                    >
+                                        {s.title}
+                                    </Typography>
+                                </Box>
                             ))}
                         </Stack>
 
@@ -216,16 +284,15 @@ const TaskDetailsDialog = ({ task, onClose, onRefresh }) => {
                                 value={newSubtask}
                                 onChange={e => setNewSubtask(e.target.value)}
                                 onKeyDown={e => e.key === 'Enter' && handleAddSubtask()}
-                                InputProps={{ sx: { borderRadius: 2, bgcolor: inputBg, fontSize: 13 } }}
-                                sx={{ flex: 1 }}
+                                sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: 13 } }}
                             />
                             <IconButton
                                 onClick={handleAddSubtask}
                                 disabled={!newSubtask.trim() || addingSubtask}
-                                color="primary"
-                                sx={{ borderRadius: 2 }}
+                                size="small"
+                                sx={{ borderRadius: 1, border: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.1)'}` }}
                             >
-                                {addingSubtask ? <CircularProgress size={18} /> : <AddRoundedIcon />}
+                                {addingSubtask ? <CircularProgress size={16} /> : <AddRoundedIcon sx={{ fontSize: 18 }} />}
                             </IconButton>
                         </Box>
                     </Box>
@@ -234,36 +301,37 @@ const TaskDetailsDialog = ({ task, onClose, onRefresh }) => {
 
                     {/* Comments */}
                     <Box>
-                        <Typography variant="subtitle2" fontWeight={700} mb={1.5}>
-                            Comments ({(t.comments || []).length})
+                        <Typography fontSize={11} fontWeight={700} letterSpacing="0.06em" color="text.disabled" mb={1.5}>
+                            COMMENTS ({(t.comments || []).length})
                         </Typography>
 
                         <Stack spacing={1.5} mb={2} sx={{ maxHeight: 200, overflowY: 'auto' }}>
                             {(t.comments || []).length === 0 && (
-                                <Typography variant="caption" color="text.disabled" sx={{ py: 1 }}>
-                                    No comments yet. Be the first to comment.
-                                </Typography>
+                                <Typography fontSize={12} color="text.disabled">No comments yet.</Typography>
                             )}
                             {(t.comments || []).map((c, i) => (
-                                <Box key={i} display="flex" gap={1.5} alignItems="flex-start">
-                                    <Avatar sx={{ width: 28, height: 28, fontSize: 12, background: 'linear-gradient(135deg, #6dd5ed, #2193b0)', flexShrink: 0 }}>
+                                <Box key={i} display="flex" gap={1.25} alignItems="flex-start">
+                                    <Avatar sx={{ width: 24, height: 24, fontSize: 10, bgcolor: '#6366f1', flexShrink: 0 }}>
                                         {(c.user?.name || c.user?.email || 'U')[0]}
                                     </Avatar>
-                                    <Box sx={{ flex: 1 }}>
+                                    <Box flex={1}>
                                         <Box display="flex" alignItems="center" gap={1} mb={0.25}>
-                                            <Typography fontSize={12} fontWeight={700}>
+                                            <Typography fontSize={12} fontWeight={600}>
                                                 {c.user?.name || c.user?.email || 'User'}
                                             </Typography>
-                                            <Typography fontSize={11} color="text.disabled">
+                                            <Typography fontSize={11} color="text.disabled" fontVariantNumeric="tabular-nums">
                                                 {new Date(c.createdAt).toLocaleDateString()}
                                             </Typography>
                                         </Box>
-                                        <Typography
-                                            fontSize={13}
-                                            sx={{ p: 1, borderRadius: 1.5, bgcolor: inputBg }}
+                                        <Box
+                                            sx={{
+                                                p: 1,
+                                                borderRadius: 1,
+                                                border: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.06)'}`,
+                                            }}
                                         >
-                                            {c.comment}
-                                        </Typography>
+                                            <Typography fontSize={13} lineHeight={1.5}>{c.comment}</Typography>
+                                        </Box>
                                     </Box>
                                 </Box>
                             ))}
@@ -279,33 +347,34 @@ const TaskDetailsDialog = ({ task, onClose, onRefresh }) => {
                                 onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleAddComment()}
                                 multiline
                                 maxRows={3}
-                                InputProps={{ sx: { borderRadius: 2, bgcolor: inputBg, fontSize: 13 } }}
+                                sx={{ '& .MuiInputBase-input': { fontSize: 13 } }}
                             />
                             <IconButton
                                 onClick={handleAddComment}
                                 disabled={!comment.trim() || submittingComment}
-                                color="primary"
-                                sx={{ borderRadius: 2, alignSelf: 'flex-end' }}
+                                size="small"
+                                sx={{
+                                    borderRadius: 1,
+                                    alignSelf: 'flex-end',
+                                    bgcolor: '#6366f1',
+                                    color: '#fff',
+                                    '&:hover': { bgcolor: '#4f46e5' },
+                                    '&.Mui-disabled': { bgcolor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.06)', color: 'text.disabled' },
+                                }}
                             >
-                                {submittingComment ? <CircularProgress size={18} /> : <SendRoundedIcon />}
+                                {submittingComment ? <CircularProgress size={16} sx={{ color: 'inherit' }} /> : <SendRoundedIcon sx={{ fontSize: 16 }} />}
                             </IconButton>
                         </Box>
                     </Box>
                 </Stack>
             </DialogContent>
 
-            <DialogActions sx={{ px: 3, pb: 2 }}>
+            <DialogActions sx={{ px: 3, pb: 3 }}>
                 <Button
-                    variant="contained"
+                    variant="outlined"
                     onClick={onClose}
-                    sx={{
-                        borderRadius: 2,
-                        fontWeight: 700,
-                        textTransform: 'none',
-                        px: 3,
-                        background: 'linear-gradient(90deg, #6dd5ed 0%, #2193b0 100%)',
-                        '&:hover': { background: 'linear-gradient(90deg, #2193b0 0%, #6dd5ed 100%)' },
-                    }}
+                    size="small"
+                    sx={{ fontSize: 13, fontWeight: 600 }}
                 >
                     Close
                 </Button>

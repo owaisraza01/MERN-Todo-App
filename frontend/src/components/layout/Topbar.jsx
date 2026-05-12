@@ -5,28 +5,27 @@ import NotificationBell from '../notifications/NotificationBell';
 
 const Topbar = ({ onMenuClick }) => {
     const theme = useTheme();
-
     return (
         <AppBar
             position="sticky"
             elevation={0}
             sx={{
                 display: { md: 'none' },
-                background: theme.palette.mode === 'dark' ? '#1a1d23' : '#ffffff',
+                background: theme.palette.background.paper,
                 borderBottom: `1px solid ${theme.palette.divider}`,
                 color: theme.palette.text.primary,
             }}
         >
-            <Toolbar>
-                <IconButton edge="start" onClick={onMenuClick} sx={{ mr: 1, color: 'text.primary' }}>
-                    <MenuRoundedIcon />
-                </IconButton>
-                <Typography
-                    variant="h6"
-                    fontWeight={900}
-                    color="primary"
-                    sx={{ letterSpacing: -0.5, fontFamily: '"Inter", sans-serif', flex: 1 }}
+            <Toolbar sx={{ minHeight: '52px !important', px: 2 }}>
+                <IconButton
+                    edge="start"
+                    onClick={onMenuClick}
+                    size="small"
+                    sx={{ mr: 1.5, color: 'text.secondary' }}
                 >
+                    <MenuRoundedIcon fontSize="small" />
+                </IconButton>
+                <Typography fontWeight={700} fontSize={14} letterSpacing="-0.02em" sx={{ flex: 1 }}>
                     TaskFlow
                 </Typography>
                 <NotificationBell />

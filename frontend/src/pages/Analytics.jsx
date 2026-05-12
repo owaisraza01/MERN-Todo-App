@@ -1,16 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
-    Box, Card, CardContent, Typography, Grid, Stack, Chip,
-    Button, CircularProgress, useTheme, Divider, Avatar,
+    Box, Typography, Grid, Stack, Button, CircularProgress, Avatar, useTheme, Divider,
 } from '@mui/material';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     LineChart, Line, Legend, Cell,
 } from 'recharts';
-import BarChartRoundedIcon from '@mui/icons-material/BarChartRounded';
 import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
-import EmojiEventsRoundedIcon from '@mui/icons-material/EmojiEventsRounded';
-import TrendingUpRoundedIcon from '@mui/icons-material/TrendingUpRounded';
 import axios from 'axios';
 import { useAuth } from '../hooks/useAuth';
 
@@ -20,12 +16,10 @@ const WEEK_LABELS = Array.from({ length: 6 }, (_, i) => {
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 });
 
-const getWeekIndex = (dateStr) => {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
-    const weekIdx = 5 - Math.floor(diffDays / 7);
-    return weekIdx >= 0 && weekIdx <= 5 ? weekIdx : null;
+const getWeekIndex = dateStr => {
+    const diffDays = Math.floor((Date.now() - new Date(dateStr)) / 86400000);
+    const wi = 5 - Math.floor(diffDays / 7);
+    return wi >= 0 && wi <= 5 ? wi : null;
 };
 
 const exportCSV = (rows, filename) => {
@@ -44,20 +38,46 @@ const exportCSV = (rows, filename) => {
     const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
+    a.href = url; a.download = filename; a.click();
     URL.revokeObjectURL(url);
+};
+
+const ChartCard = ({ title, children }) => {
+    const theme = useTheme();
+    const dark = theme.palette.mode === 'dark';
+    return (
+        <Box
+            sx={{
+                border: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(15,23,42,0.09)'}`,
+                borderRadius: 1.5,
+                p: 2.5,
+                bgcolor: 'background.paper',
+                height: '100%',
+            }}
+        >
+            <Typography fontSize={11} fontWeight={700} letterSpacing="0.06em" color="text.disabled" mb={2}>
+                {title}
+            </Typography>
+            {children}
+        </Box>
+    );
 };
 
 const Analytics = () => {
     const theme = useTheme();
+    const dark = theme.palette.mode === 'dark';
     const { authHeader } = useAuth();
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const cardBg = theme.palette.mode === 'dark' ? '#1e2533' : '#fff';
     const textMuted = theme.palette.text.secondary;
+    const tooltipStyle = {
+        background: dark ? '#0d1424' : '#fff',
+        border: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(15,23,42,0.1)'}`,
+        borderRadius: 6,
+        fontSize: 12,
+        boxShadow: 'none',
+    };
 
     const fetchTasks = useCallback(async () => {
         setLoading(true);
@@ -74,16 +94,15 @@ const Analytics = () => {
     if (loading) {
         return (
             <Box display="flex" justifyContent="center" alignItems="center" minHeight={300}>
-                <CircularProgress />
+                <CircularProgress size={28} />
             </Box>
         );
     }
 
-    // --- Derived data ---
     const completedTasks = tasks.filter(t => t.status === 'completed');
+    const overdueTasks = tasks.filter(t => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'completed');
     const completionRate = tasks.length > 0 ? Math.round((completedTasks.length / tasks.length) * 100) : 0;
 
-    // Team productivity: completed & total per user
     const userMap = {};
     tasks.forEach(t => {
         (t.assignedTo || []).forEach(u => {
@@ -93,13 +112,10 @@ const Analytics = () => {
             if (t.status === 'completed') userMap[u._id].completed++;
         });
     });
-    const teamData = Object.values(userMap)
-        .sort((a, b) => b.completed - a.completed)
-        .slice(0, 8);
+    const teamData = Object.values(userMap).sort((a, b) => b.completed - a.completed).slice(0, 8);
     const topUser = teamData[0];
 
-    // Creation trend: tasks created per week (last 6 weeks)
-    const trendData = WEEK_LABELS.map((label, i) => ({ week: label, created: 0, completed: 0 }));
+    const trendData = WEEK_LABELS.map(label => ({ week: label, created: 0, completed: 0 }));
     tasks.forEach(t => {
         const wi = getWeekIndex(t.createdAt);
         if (wi !== null) {
@@ -108,195 +124,178 @@ const Analytics = () => {
         }
     });
 
-    // Priority distribution
     const priorityData = [
-        { name: 'Low', value: tasks.filter(t => t.priority === 'low').length, fill: '#43e97b' },
-        { name: 'Medium', value: tasks.filter(t => t.priority === 'medium').length, fill: '#fdcb6e' },
-        { name: 'High', value: tasks.filter(t => t.priority === 'high').length, fill: '#e17055' },
+        { name: 'Low', value: tasks.filter(t => t.priority === 'low').length, fill: '#10b981' },
+        { name: 'Medium', value: tasks.filter(t => t.priority === 'medium').length, fill: '#f59e0b' },
+        { name: 'High', value: tasks.filter(t => t.priority === 'high').length, fill: '#ef4444' },
+    ];
+
+    const statCards = [
+        { label: 'TOTAL TASKS', value: tasks.length, color: '#6366f1' },
+        { label: 'COMPLETION', value: `${completionRate}%`, color: '#10b981' },
+        { label: 'OVERDUE', value: overdueTasks.length, color: '#ef4444' },
+        { label: 'TEAM SIZE', value: Object.keys(userMap).length, color: '#f59e0b' },
     ];
 
     return (
         <Box>
             {/* Header */}
-            <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider', mb: 3 }}>
-                <CardContent>
-                    <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Stack direction="row" alignItems="center" gap={1}>
-                            <BarChartRoundedIcon color="primary" />
-                            <Typography variant="h6" fontWeight={800} color="primary">Analytics</Typography>
-                        </Stack>
-                        <Button
-                            variant="outlined"
-                            size="small"
-                            startIcon={<DownloadRoundedIcon />}
-                            onClick={() => exportCSV(tasks, 'taskflow-all-tasks.csv')}
-                            sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
-                        >
-                            Export All CSV
-                        </Button>
-                    </Stack>
-                </CardContent>
-            </Card>
+            <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
+                <Typography fontSize={11} fontWeight={700} letterSpacing="0.06em" color="text.disabled">
+                    ANALYTICS
+                </Typography>
+                <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<DownloadRoundedIcon sx={{ fontSize: 14 }} />}
+                    onClick={() => exportCSV(tasks, 'taskflow-all-tasks.csv')}
+                    sx={{ fontSize: 12, fontWeight: 600 }}
+                >
+                    Export CSV
+                </Button>
+            </Box>
 
-            <Grid container spacing={3}>
-                {/* Summary stats */}
-                {[
-                    { label: 'Total Tasks', value: tasks.length, color: '#667eea' },
-                    { label: 'Completion Rate', value: `${completionRate}%`, color: '#43e97b' },
-                    { label: 'Overdue', value: tasks.filter(t => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'completed').length, color: '#e17055' },
-                    { label: 'Team Members', value: Object.keys(userMap).length, color: '#4facfe' },
-                ].map(s => (
-                    <Grid item xs={6} md={3} key={s.label}>
-                        <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider', bgcolor: cardBg }}>
-                            <CardContent sx={{ textAlign: 'center', py: 2.5 }}>
-                                <Typography variant="h3" fontWeight={900} sx={{ color: s.color }}>{s.value}</Typography>
-                                <Typography fontSize={13} color="text.secondary" fontWeight={600}>{s.label}</Typography>
-                            </CardContent>
-                        </Card>
+            <Grid container spacing={2}>
+                {/* Stat cards */}
+                {statCards.map(s => (
+                    <Grid item xs={6} sm={3} key={s.label}>
+                        <Box
+                            sx={{
+                                border: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(15,23,42,0.09)'}`,
+                                borderTop: `3px solid ${s.color}`,
+                                borderRadius: 1.5,
+                                p: 2,
+                                bgcolor: 'background.paper',
+                            }}
+                        >
+                            <Typography
+                                fontSize={28}
+                                fontWeight={800}
+                                lineHeight={1}
+                                mb={0.75}
+                                sx={{ fontVariantNumeric: 'tabular-nums', color: s.color }}
+                            >
+                                {s.value}
+                            </Typography>
+                            <Typography fontSize={11} fontWeight={600} letterSpacing="0.05em" color="text.disabled">
+                                {s.label}
+                            </Typography>
+                        </Box>
                     </Grid>
                 ))}
 
-                {/* Task creation & completion trend */}
+                {/* Trend line chart */}
                 <Grid item xs={12} md={8}>
-                    <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider', bgcolor: cardBg }}>
-                        <CardContent>
-                            <Stack direction="row" alignItems="center" gap={1} mb={2}>
-                                <TrendingUpRoundedIcon fontSize="small" color="primary" />
-                                <Typography variant="subtitle1" fontWeight={700}>6-Week Task Trend</Typography>
-                            </Stack>
-                            <ResponsiveContainer width="100%" height={220}>
-                                <LineChart data={trendData}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} vertical={false} />
-                                    <XAxis dataKey="week" tick={{ fontSize: 11, fill: textMuted }} axisLine={false} tickLine={false} />
-                                    <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: textMuted }} axisLine={false} tickLine={false} />
-                                    <Tooltip
-                                        contentStyle={{
-                                            background: theme.palette.background.paper,
-                                            border: `1px solid ${theme.palette.divider}`,
-                                            borderRadius: 8,
-                                            fontSize: 13,
-                                        }}
-                                    />
-                                    <Legend wrapperStyle={{ fontSize: 13 }} />
-                                    <Line type="monotone" dataKey="created" stroke="#4facfe" strokeWidth={2.5} dot={{ r: 4 }} name="Created" />
-                                    <Line type="monotone" dataKey="completed" stroke="#43e97b" strokeWidth={2.5} dot={{ r: 4 }} name="Completed" />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </CardContent>
-                    </Card>
+                    <ChartCard title="6-WEEK TASK TREND">
+                        <ResponsiveContainer width="100%" height={220}>
+                            <LineChart data={trendData}>
+                                <CartesianGrid strokeDasharray="3 3" stroke={dark ? 'rgba(255,255,255,0.05)' : 'rgba(15,23,42,0.06)'} vertical={false} />
+                                <XAxis dataKey="week" tick={{ fontSize: 11, fill: textMuted }} axisLine={false} tickLine={false} />
+                                <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: textMuted }} axisLine={false} tickLine={false} />
+                                <Tooltip contentStyle={tooltipStyle} />
+                                <Legend wrapperStyle={{ fontSize: 12 }} />
+                                <Line type="monotone" dataKey="created" stroke="#6366f1" strokeWidth={2} dot={{ r: 3, fill: '#6366f1' }} name="Created" />
+                                <Line type="monotone" dataKey="completed" stroke="#10b981" strokeWidth={2} dot={{ r: 3, fill: '#10b981' }} name="Completed" />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </ChartCard>
                 </Grid>
 
-                {/* Priority distribution */}
+                {/* Priority split */}
                 <Grid item xs={12} md={4}>
-                    <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider', bgcolor: cardBg, height: '100%' }}>
-                        <CardContent>
-                            <Typography variant="subtitle1" fontWeight={700} mb={2}>Priority Split</Typography>
-                            <ResponsiveContainer width="100%" height={180}>
-                                <BarChart data={priorityData} barSize={36}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} vertical={false} />
-                                    <XAxis dataKey="name" tick={{ fontSize: 12, fill: textMuted }} axisLine={false} tickLine={false} />
-                                    <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: textMuted }} axisLine={false} tickLine={false} />
-                                    <Tooltip
-                                        contentStyle={{
-                                            background: theme.palette.background.paper,
-                                            border: `1px solid ${theme.palette.divider}`,
-                                            borderRadius: 8,
-                                            fontSize: 13,
-                                        }}
-                                    />
-                                    <Bar dataKey="value" radius={[6, 6, 0, 0]} name="Tasks">
-                                        {priorityData.map((entry, i) => (
-                                            <Cell key={i} fill={entry.fill} />
-                                        ))}
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </CardContent>
-                    </Card>
+                    <ChartCard title="PRIORITY SPLIT">
+                        <ResponsiveContainer width="100%" height={220}>
+                            <BarChart data={priorityData} barSize={32}>
+                                <CartesianGrid strokeDasharray="3 3" stroke={dark ? 'rgba(255,255,255,0.05)' : 'rgba(15,23,42,0.06)'} vertical={false} />
+                                <XAxis dataKey="name" tick={{ fontSize: 12, fill: textMuted }} axisLine={false} tickLine={false} />
+                                <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: textMuted }} axisLine={false} tickLine={false} />
+                                <Tooltip contentStyle={tooltipStyle} />
+                                <Bar dataKey="value" radius={[4, 4, 0, 0]} name="Tasks">
+                                    {priorityData.map((entry, i) => (
+                                        <Cell key={i} fill={entry.fill} />
+                                    ))}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </ChartCard>
                 </Grid>
 
                 {/* Team productivity */}
                 <Grid item xs={12} md={8}>
-                    <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider', bgcolor: cardBg }}>
-                        <CardContent>
-                            <Typography variant="subtitle1" fontWeight={700} mb={2}>Team Productivity</Typography>
-                            {teamData.length === 0 ? (
-                                <Typography variant="body2" color="text.disabled" textAlign="center" py={4}>
-                                    No tasks assigned to team members yet
-                                </Typography>
-                            ) : (
-                                <ResponsiveContainer width="100%" height={220}>
-                                    <BarChart data={teamData} barSize={28} barGap={4}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} vertical={false} />
-                                        <XAxis
-                                            dataKey="name"
-                                            tick={{ fontSize: 11, fill: textMuted }}
-                                            axisLine={false}
-                                            tickLine={false}
-                                            interval={0}
-                                            tickFormatter={v => v.split(' ')[0]}
-                                        />
-                                        <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: textMuted }} axisLine={false} tickLine={false} />
-                                        <Tooltip
-                                            contentStyle={{
-                                                background: theme.palette.background.paper,
-                                                border: `1px solid ${theme.palette.divider}`,
-                                                borderRadius: 8,
-                                                fontSize: 13,
-                                            }}
-                                        />
-                                        <Legend wrapperStyle={{ fontSize: 13 }} />
-                                        <Bar dataKey="total" fill="#4facfe" radius={[4, 4, 0, 0]} name="Assigned" />
-                                        <Bar dataKey="completed" fill="#43e97b" radius={[4, 4, 0, 0]} name="Completed" />
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            )}
-                        </CardContent>
-                    </Card>
+                    <ChartCard title="TEAM PRODUCTIVITY">
+                        {teamData.length === 0 ? (
+                            <Typography fontSize={13} color="text.disabled" textAlign="center" py={6}>
+                                No tasks assigned yet
+                            </Typography>
+                        ) : (
+                            <ResponsiveContainer width="100%" height={220}>
+                                <BarChart data={teamData} barSize={22} barGap={3}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke={dark ? 'rgba(255,255,255,0.05)' : 'rgba(15,23,42,0.06)'} vertical={false} />
+                                    <XAxis
+                                        dataKey="name"
+                                        tick={{ fontSize: 11, fill: textMuted }}
+                                        axisLine={false}
+                                        tickLine={false}
+                                        interval={0}
+                                        tickFormatter={v => v.split(' ')[0]}
+                                    />
+                                    <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: textMuted }} axisLine={false} tickLine={false} />
+                                    <Tooltip contentStyle={tooltipStyle} />
+                                    <Legend wrapperStyle={{ fontSize: 12 }} />
+                                    <Bar dataKey="total" fill="#6366f1" radius={[3, 3, 0, 0]} name="Assigned" />
+                                    <Bar dataKey="completed" fill="#10b981" radius={[3, 3, 0, 0]} name="Completed" />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
+                    </ChartCard>
                 </Grid>
 
                 {/* Top performer */}
                 <Grid item xs={12} md={4}>
-                    <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider', bgcolor: cardBg, height: '100%' }}>
-                        <CardContent sx={{ textAlign: 'center', py: 4 }}>
-                            <EmojiEventsRoundedIcon sx={{ fontSize: 44, color: '#fdcb6e', mb: 1 }} />
-                            <Typography variant="subtitle2" fontWeight={700} color="text.secondary" mb={2}>
-                                Top Performer
+                    <ChartCard title="TOP PERFORMER">
+                        {topUser ? (
+                            <Box textAlign="center" pt={1}>
+                                <Avatar
+                                    sx={{
+                                        width: 52,
+                                        height: 52,
+                                        fontSize: 20,
+                                        fontWeight: 700,
+                                        bgcolor: '#6366f1',
+                                        mx: 'auto',
+                                        mb: 1.5,
+                                    }}
+                                >
+                                    {topUser.name[0].toUpperCase()}
+                                </Avatar>
+                                <Typography fontWeight={700} fontSize={15} mb={0.25}>
+                                    {topUser.name}
+                                </Typography>
+                                <Typography fontSize={12} color="text.secondary" mb={2}>
+                                    {Math.round((topUser.completed / topUser.total) * 100)}% completion rate
+                                </Typography>
+                                <Divider sx={{ mb: 2 }} />
+                                <Stack direction="row" justifyContent="center" spacing={3}>
+                                    <Box textAlign="center">
+                                        <Typography fontWeight={800} fontSize={20} sx={{ fontVariantNumeric: 'tabular-nums', color: '#10b981' }}>
+                                            {topUser.completed}
+                                        </Typography>
+                                        <Typography fontSize={11} color="text.disabled">Done</Typography>
+                                    </Box>
+                                    <Box textAlign="center">
+                                        <Typography fontWeight={800} fontSize={20} sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                                            {topUser.total}
+                                        </Typography>
+                                        <Typography fontSize={11} color="text.disabled">Total</Typography>
+                                    </Box>
+                                </Stack>
+                            </Box>
+                        ) : (
+                            <Typography fontSize={13} color="text.disabled" textAlign="center" py={6}>
+                                No data yet
                             </Typography>
-                            {topUser ? (
-                                <>
-                                    <Avatar
-                                        sx={{
-                                            width: 56, height: 56, fontSize: 22, fontWeight: 700, mx: 'auto', mb: 1.5,
-                                            background: 'linear-gradient(135deg, #6dd5ed, #2193b0)',
-                                        }}
-                                    >
-                                        {topUser.name[0].toUpperCase()}
-                                    </Avatar>
-                                    <Typography fontWeight={800} fontSize={17}>{topUser.name}</Typography>
-                                    <Divider sx={{ my: 1.5 }} />
-                                    <Stack direction="row" justifyContent="center" spacing={2}>
-                                        <Box textAlign="center">
-                                            <Typography fontWeight={900} fontSize={22} color="success.main">{topUser.completed}</Typography>
-                                            <Typography fontSize={11} color="text.secondary">Completed</Typography>
-                                        </Box>
-                                        <Box textAlign="center">
-                                            <Typography fontWeight={900} fontSize={22}>{topUser.total}</Typography>
-                                            <Typography fontSize={11} color="text.secondary">Assigned</Typography>
-                                        </Box>
-                                        <Box textAlign="center">
-                                            <Typography fontWeight={900} fontSize={22} color="primary.main">
-                                                {Math.round((topUser.completed / topUser.total) * 100)}%
-                                            </Typography>
-                                            <Typography fontSize={11} color="text.secondary">Rate</Typography>
-                                        </Box>
-                                    </Stack>
-                                </>
-                            ) : (
-                                <Typography variant="body2" color="text.disabled">No assigned tasks yet</Typography>
-                            )}
-                        </CardContent>
-                    </Card>
+                        )}
+                    </ChartCard>
                 </Grid>
             </Grid>
         </Box>

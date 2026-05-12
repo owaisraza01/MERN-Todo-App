@@ -1,27 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import {
     Dialog, DialogTitle, DialogContent, DialogActions,
-    TextField, Button, MenuItem, Stack, Chip, Box, Avatar, useTheme,
+    TextField, Button, MenuItem, Box, Avatar, Typography, useTheme,
 } from '@mui/material';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import FlagIcon from '@mui/icons-material/Flag';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import EditNoteIcon from '@mui/icons-material/EditNote';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
 
-const priorities = [
-    { label: 'Low', value: 'low', color: 'default' },
-    { label: 'Medium', value: 'medium', color: 'warning' },
-    { label: 'High', value: 'high', color: 'error' },
+const PRIORITIES = [
+    { label: 'Low', value: 'low', color: '#10b981' },
+    { label: 'Medium', value: 'medium', color: '#f59e0b' },
+    { label: 'High', value: 'high', color: '#ef4444' },
 ];
 
-const statuses = [
-    { label: 'Pending', value: 'pending', color: 'warning' },
-    { label: 'In Progress', value: 'in-progress', color: 'info' },
-    { label: 'Completed', value: 'completed', color: 'success' },
+const STATUSES = [
+    { label: 'Pending', value: 'pending', color: '#f59e0b' },
+    { label: 'In Progress', value: 'in-progress', color: '#6366f1' },
+    { label: 'Completed', value: 'completed', color: '#10b981' },
 ];
 
 const EMPTY_FORM = { title: '', description: '', status: 'pending', priority: 'medium', dueDate: '', assignedTo: [] };
@@ -31,6 +26,7 @@ const TaskFormDialog = ({ open, onClose, editTask }) => {
     const [users, setUsers] = useState([]);
     const [saving, setSaving] = useState(false);
     const theme = useTheme();
+    const dark = theme.palette.mode === 'dark';
     const { authHeader } = useAuth();
 
     useEffect(() => {
@@ -43,7 +39,6 @@ const TaskFormDialog = ({ open, onClose, editTask }) => {
         } else {
             setForm(EMPTY_FORM);
         }
-
         axios.get('/api/users', { headers: authHeader })
             .then(res => setUsers(Array.isArray(res.data) ? res.data : res.data.users || []))
             .catch(() => setUsers([]));
@@ -74,8 +69,6 @@ const TaskFormDialog = ({ open, onClose, editTask }) => {
         }
     };
 
-    const inputBg = theme.palette.mode === 'dark' ? 'rgba(44,62,80,0.85)' : '#f8fbff';
-
     return (
         <Dialog
             open={open}
@@ -84,146 +77,153 @@ const TaskFormDialog = ({ open, onClose, editTask }) => {
             maxWidth="sm"
             PaperProps={{
                 sx: {
-                    borderRadius: 3,
-                    background: theme.palette.mode === 'dark' ? '#1e2533' : '#ffffff',
-                    p: 1,
+                    borderRadius: 1.5,
+                    bgcolor: dark ? '#0d1424' : '#fff',
+                    backgroundImage: 'none',
+                    border: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(15,23,42,0.1)'}`,
                 },
             }}
         >
-            <DialogTitle
-                sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                    fontWeight: 800,
-                    color: 'primary.main',
-                }}
-            >
-                <EditNoteIcon />
-                {editTask ? 'Edit Task' : 'New Task'}
+            <DialogTitle sx={{ px: 3, pt: 3, pb: 1.5 }}>
+                <Typography fontSize={14} fontWeight={700} letterSpacing="0.04em" color="text.primary">
+                    {editTask ? 'EDIT TASK' : 'NEW TASK'}
+                </Typography>
             </DialogTitle>
+
             <form onSubmit={handleSubmit}>
-                <DialogContent>
-                    <Stack spacing={2}>
-                        <TextField
-                            required
-                            name="title"
-                            label="Title"
-                            placeholder="Enter task title"
-                            value={form.title}
-                            onChange={handleChange}
-                            InputProps={{
-                                startAdornment: <AssignmentIcon sx={{ mr: 1, color: 'text.disabled' }} />,
-                                sx: { bgcolor: inputBg, borderRadius: 2, fontWeight: 600 },
-                            }}
-                        />
-                        <TextField
-                            multiline
-                            rows={3}
-                            name="description"
-                            label="Description"
-                            placeholder="Describe the task"
-                            value={form.description}
-                            onChange={handleChange}
-                            InputProps={{ sx: { bgcolor: inputBg, borderRadius: 2 } }}
-                        />
-                        <Box display="flex" gap={2}>
-                            <TextField
-                                select
-                                name="status"
-                                label="Status"
-                                value={form.status}
-                                onChange={handleChange}
-                                fullWidth
-                                InputProps={{ sx: { bgcolor: inputBg, borderRadius: 2 } }}
-                            >
-                                {statuses.map(s => (
-                                    <MenuItem key={s.value} value={s.value}>
-                                        <Chip label={s.label} color={s.color} size="small" sx={{ fontWeight: 700 }} />
-                                    </MenuItem>
-                                ))}
-                            </TextField>
-                            <TextField
-                                select
-                                name="priority"
-                                label="Priority"
-                                value={form.priority}
-                                onChange={handleChange}
-                                fullWidth
-                                InputProps={{ sx: { bgcolor: inputBg, borderRadius: 2 } }}
-                            >
-                                {priorities.map(p => (
-                                    <MenuItem key={p.value} value={p.value}>
-                                        <Chip
-                                            icon={<FlagIcon />}
-                                            label={p.label}
-                                            color={p.color}
-                                            size="small"
-                                            sx={{ fontWeight: 700 }}
-                                        />
-                                    </MenuItem>
-                                ))}
-                            </TextField>
-                        </Box>
-                        <TextField
-                            name="dueDate"
-                            label="Due Date"
-                            type="date"
-                            value={form.dueDate}
-                            InputLabelProps={{ shrink: true }}
-                            onChange={handleChange}
-                            InputProps={{
-                                startAdornment: <CalendarMonthIcon sx={{ mr: 1, color: 'text.disabled' }} />,
-                                sx: { bgcolor: inputBg, borderRadius: 2 },
-                            }}
-                        />
+                <DialogContent sx={{ px: 3, pt: 1, pb: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <TextField
+                        required
+                        name="title"
+                        label="Title"
+                        placeholder="Task title"
+                        value={form.title}
+                        onChange={handleChange}
+                        size="small"
+                        fullWidth
+                    />
+
+                    <TextField
+                        multiline
+                        rows={3}
+                        name="description"
+                        label="Description"
+                        placeholder="Optional description"
+                        value={form.description}
+                        onChange={handleChange}
+                        size="small"
+                        fullWidth
+                    />
+
+                    <Box display="flex" gap={2}>
                         <TextField
                             select
-                            SelectProps={{
-                                multiple: true,
-                                renderValue: (selected) => (
-                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                        {selected.map(id => {
-                                            const user = users.find(u => u._id === id);
-                                            return (
-                                                <Chip
-                                                    key={id}
-                                                    avatar={<Avatar>{(user?.name || user?.email || 'U')[0]}</Avatar>}
-                                                    label={user?.name || user?.email}
-                                                    sx={{ fontWeight: 600 }}
-                                                />
-                                            );
-                                        })}
-                                    </Box>
-                                ),
-                            }}
-                            name="assignedTo"
-                            label="Assign To"
-                            value={form.assignedTo}
-                            onChange={e => setForm(f => ({ ...f, assignedTo: e.target.value }))}
-                            InputProps={{
-                                startAdornment: <PersonAddIcon sx={{ mr: 1, color: 'text.disabled' }} />,
-                                sx: { bgcolor: inputBg, borderRadius: 2 },
-                            }}
+                            name="status"
+                            label="Status"
+                            value={form.status}
+                            onChange={handleChange}
+                            size="small"
+                            fullWidth
                         >
-                            {users.map(user => (
-                                <MenuItem key={user._id} value={user._id}>
+                            {STATUSES.map(s => (
+                                <MenuItem key={s.value} value={s.value}>
                                     <Box display="flex" alignItems="center" gap={1}>
-                                        <Avatar sx={{ width: 24, height: 24, fontSize: 13 }}>
-                                            {(user.name || user.email || 'U')[0]}
-                                        </Avatar>
-                                        {user.name || user.email}
+                                        <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: s.color, flexShrink: 0 }} />
+                                        <Typography fontSize={13}>{s.label}</Typography>
                                     </Box>
                                 </MenuItem>
                             ))}
                         </TextField>
-                    </Stack>
+
+                        <TextField
+                            select
+                            name="priority"
+                            label="Priority"
+                            value={form.priority}
+                            onChange={handleChange}
+                            size="small"
+                            fullWidth
+                        >
+                            {PRIORITIES.map(p => (
+                                <MenuItem key={p.value} value={p.value}>
+                                    <Box display="flex" alignItems="center" gap={1}>
+                                        <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: p.color, flexShrink: 0 }} />
+                                        <Typography fontSize={13}>{p.label}</Typography>
+                                    </Box>
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    </Box>
+
+                    <TextField
+                        name="dueDate"
+                        label="Due Date"
+                        type="date"
+                        value={form.dueDate}
+                        InputLabelProps={{ shrink: true }}
+                        onChange={handleChange}
+                        size="small"
+                        fullWidth
+                    />
+
+                    <TextField
+                        select
+                        SelectProps={{
+                            multiple: true,
+                            renderValue: (selected) => (
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                    {selected.map(id => {
+                                        const u = users.find(u => u._id === id);
+                                        return (
+                                            <Box
+                                                key={id}
+                                                sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 0.5,
+                                                    px: 0.75,
+                                                    py: 0.25,
+                                                    borderRadius: 0.75,
+                                                    border: `1px solid ${dark ? 'rgba(255,255,255,0.1)' : 'rgba(15,23,42,0.12)'}`,
+                                                    fontSize: 12,
+                                                }}
+                                            >
+                                                <Avatar sx={{ width: 16, height: 16, fontSize: 9, bgcolor: '#6366f1' }}>
+                                                    {(u?.name || u?.email || 'U')[0]}
+                                                </Avatar>
+                                                {u?.name || u?.email}
+                                            </Box>
+                                        );
+                                    })}
+                                </Box>
+                            ),
+                        }}
+                        name="assignedTo"
+                        label="Assign To"
+                        value={form.assignedTo}
+                        onChange={e => setForm(f => ({ ...f, assignedTo: e.target.value }))}
+                        size="small"
+                        fullWidth
+                    >
+                        {users.map(u => (
+                            <MenuItem key={u._id} value={u._id}>
+                                <Box display="flex" alignItems="center" gap={1}>
+                                    <Avatar sx={{ width: 20, height: 20, fontSize: 10, bgcolor: '#6366f1' }}>
+                                        {(u.name || u.email || 'U')[0]}
+                                    </Avatar>
+                                    <Typography fontSize={13}>{u.name || u.email}</Typography>
+                                </Box>
+                            </MenuItem>
+                        ))}
+                    </TextField>
                 </DialogContent>
-                <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+
+                <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
                     <Button
                         variant="outlined"
                         onClick={() => onClose(false)}
-                        sx={{ borderRadius: 2, fontWeight: 700, textTransform: 'none', px: 3 }}
+                        size="small"
+                        sx={{ fontSize: 13, fontWeight: 600 }}
                     >
                         Cancel
                     </Button>
@@ -231,14 +231,8 @@ const TaskFormDialog = ({ open, onClose, editTask }) => {
                         type="submit"
                         variant="contained"
                         disabled={saving}
-                        sx={{
-                            borderRadius: 2,
-                            fontWeight: 700,
-                            textTransform: 'none',
-                            px: 3,
-                            background: 'linear-gradient(90deg, #6dd5ed 0%, #2193b0 100%)',
-                            '&:hover': { background: 'linear-gradient(90deg, #2193b0 0%, #6dd5ed 100%)' },
-                        }}
+                        size="small"
+                        sx={{ fontSize: 13, fontWeight: 600, minWidth: 80 }}
                     >
                         {saving ? 'Saving...' : editTask ? 'Save' : 'Create'}
                     </Button>

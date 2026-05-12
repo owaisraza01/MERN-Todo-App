@@ -1,10 +1,5 @@
 import React, { useState } from 'react';
-import {
-    Box, Paper, Typography, TextField, Button, Divider, Alert, useTheme,
-    InputAdornment, IconButton,
-} from '@mui/material';
-import LockRoundedIcon from '@mui/icons-material/LockRounded';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { Box, Typography, TextField, Button, Alert, Link, useTheme } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 
@@ -12,30 +7,16 @@ const ResetPassword = () => {
     const { token } = useParams();
     const [password, setPassword] = useState('');
     const [confirm, setConfirm] = useState('');
-    const [showPass, setShowPass] = useState(false);
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState(null);
     const nav = useNavigate();
     const theme = useTheme();
-
-    const glassBg = theme.palette.mode === 'dark'
-        ? 'linear-gradient(120deg, #232526 0%, #414345 100%)'
-        : 'linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%)';
-    const cardBg = theme.palette.mode === 'dark'
-        ? 'rgba(30, 37, 51, 0.98)'
-        : 'rgba(255,255,255,0.95)';
-    const inputBg = theme.palette.mode === 'dark' ? 'rgba(44,62,80,0.88)' : '#f8fbff';
+    const dark = theme.palette.mode === 'dark';
 
     const handleSubmit = async e => {
         e.preventDefault();
-        if (password !== confirm) {
-            setResult({ type: 'error', message: 'Passwords do not match' });
-            return;
-        }
-        if (password.length < 6) {
-            setResult({ type: 'error', message: 'Password must be at least 6 characters' });
-            return;
-        }
+        if (password !== confirm) { setResult({ type: 'error', message: 'Passwords do not match' }); return; }
+        if (password.length < 6) { setResult({ type: 'error', message: 'Password must be at least 6 characters' }); return; }
         setLoading(true);
         setResult(null);
         try {
@@ -53,102 +34,79 @@ const ResetPassword = () => {
         <Box
             sx={{
                 minHeight: '100vh',
-                background: glassBg,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                p: 2,
+                bgcolor: 'background.default',
+                p: 3,
             }}
         >
-            <Paper
-                elevation={8}
+            <Box
                 sx={{
-                    maxWidth: 440,
                     width: '100%',
-                    borderRadius: 4,
-                    p: { xs: 3, sm: 5 },
-                    background: cardBg,
-                    backdropFilter: 'blur(18px)',
-                    boxShadow: theme.palette.mode === 'dark'
-                        ? '0 16px 48px 0 rgba(0,0,0,0.5)'
-                        : '0 16px 48px 0 rgba(33,147,176,0.15)',
+                    maxWidth: 380,
+                    bgcolor: 'background.paper',
+                    border: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.08)'}`,
+                    borderRadius: 2,
+                    p: { xs: 3, sm: 4 },
                 }}
             >
-                <Box display="flex" alignItems="center" gap={1.5} mb={1}>
-                    <LockRoundedIcon sx={{ color: 'primary.main', fontSize: 32 }} />
-                    <Typography variant="h5" fontWeight={900} color="primary">
-                        Reset Password
-                    </Typography>
-                </Box>
-                <Typography variant="body2" color="text.secondary" mb={3}>
-                    Enter your new password below.
+                <Typography variant="h5" fontWeight={700} letterSpacing="-0.02em" mb={0.5}>
+                    New password
                 </Typography>
-                <Divider sx={{ mb: 3 }} />
+                <Typography fontSize={13} color="text.secondary" mb={3}>
+                    Choose a strong password of at least 6 characters.
+                </Typography>
 
                 {result && (
-                    <Alert severity={result.type} sx={{ mb: 2, borderRadius: 2 }}>
-                        {result.message}
-                        {result.type === 'success' && ' Redirecting to login...'}
+                    <Alert severity={result.type} sx={{ mb: 2, borderRadius: 1.5, fontSize: 13 }}>
+                        {result.message}{result.type === 'success' && ' Redirecting…'}
                     </Alert>
                 )}
 
                 <form onSubmit={handleSubmit}>
-                    <TextField
-                        label="New Password"
-                        type={showPass ? 'text' : 'password'}
-                        fullWidth
-                        required
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        sx={{ mb: 2 }}
-                        InputProps={{
-                            sx: { borderRadius: 2, bgcolor: inputBg },
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <IconButton onClick={() => setShowPass(v => !v)} edge="end" tabIndex={-1}>
-                                        {showPass ? <VisibilityOff /> : <Visibility />}
-                                    </IconButton>
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
-                    <TextField
-                        label="Confirm Password"
-                        type={showPass ? 'text' : 'password'}
-                        fullWidth
-                        required
-                        value={confirm}
-                        onChange={e => setConfirm(e.target.value)}
-                        sx={{ mb: 3 }}
-                        InputProps={{ sx: { borderRadius: 2, bgcolor: inputBg } }}
-                    />
+                    {[
+                        { label: 'NEW PASSWORD', value: password, set: setPassword, placeholder: '••••••••' },
+                        { label: 'CONFIRM PASSWORD', value: confirm, set: setConfirm, placeholder: '••••••••' },
+                    ].map(f => (
+                        <Box key={f.label} mb={2}>
+                            <Typography fontSize={12} fontWeight={500} color="text.secondary" mb={0.75} letterSpacing="0.02em">
+                                {f.label}
+                            </Typography>
+                            <TextField
+                                type="password"
+                                fullWidth
+                                required
+                                placeholder={f.placeholder}
+                                value={f.value}
+                                onChange={e => f.set(e.target.value)}
+                            />
+                        </Box>
+                    ))}
+
                     <Button
                         type="submit"
                         variant="contained"
                         fullWidth
-                        size="large"
                         disabled={loading || result?.type === 'success'}
-                        sx={{
-                            borderRadius: 2,
-                            fontWeight: 700,
-                            py: 1.4,
-                            textTransform: 'none',
-                            fontSize: 15,
-                            background: 'linear-gradient(90deg, #6dd5ed 0%, #2193b0 100%)',
-                            '&:hover': { background: 'linear-gradient(90deg, #2193b0 0%, #6dd5ed 100%)' },
-                        }}
+                        sx={{ py: 1.1, fontWeight: 600, mt: 0.5 }}
                     >
-                        {loading ? 'Resetting...' : 'Reset Password'}
-                    </Button>
-                    <Button
-                        fullWidth
-                        onClick={() => nav('/login')}
-                        sx={{ mt: 2, borderRadius: 2, fontWeight: 600, textTransform: 'none', color: 'primary.main' }}
-                    >
-                        Back to Sign In
+                        {loading ? 'Resetting…' : 'Reset password'}
                     </Button>
                 </form>
-            </Paper>
+
+                <Box mt={2.5} textAlign="center">
+                    <Link
+                        component="button"
+                        onClick={() => nav('/login')}
+                        fontSize={13}
+                        color="text.secondary"
+                        underline="hover"
+                    >
+                        ← Back to sign in
+                    </Link>
+                </Box>
+            </Box>
         </Box>
     );
 };

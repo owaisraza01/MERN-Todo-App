@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
-import {
-    Box, Paper, Typography, TextField, Button, Divider, Alert, useTheme,
-} from '@mui/material';
-import LockResetRoundedIcon from '@mui/icons-material/LockResetRounded';
+import { Box, Typography, TextField, Button, Alert, Link, useTheme } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -12,14 +9,7 @@ const ForgotPassword = () => {
     const [result, setResult] = useState(null);
     const nav = useNavigate();
     const theme = useTheme();
-
-    const glassBg = theme.palette.mode === 'dark'
-        ? 'linear-gradient(120deg, #232526 0%, #414345 100%)'
-        : 'linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%)';
-    const cardBg = theme.palette.mode === 'dark'
-        ? 'rgba(30, 37, 51, 0.98)'
-        : 'rgba(255,255,255,0.95)';
-    const inputBg = theme.palette.mode === 'dark' ? 'rgba(44,62,80,0.88)' : '#f8fbff';
+    const dark = theme.palette.mode === 'dark';
 
     const handleSubmit = async e => {
         e.preventDefault();
@@ -29,7 +19,7 @@ const ForgotPassword = () => {
             const { data } = await axios.post('/api/auth/forgot-password', { email });
             setResult({ type: 'success', message: data.message, resetUrl: data.resetUrl });
         } catch (err) {
-            setResult({ type: 'error', message: err.response?.data?.message || 'Failed to send reset link' });
+            setResult({ type: 'error', message: err.response?.data?.message || 'Request failed' });
         } finally {
             setLoading(false);
         }
@@ -39,44 +29,36 @@ const ForgotPassword = () => {
         <Box
             sx={{
                 minHeight: '100vh',
-                background: glassBg,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                p: 2,
+                bgcolor: 'background.default',
+                p: 3,
             }}
         >
-            <Paper
-                elevation={8}
+            <Box
                 sx={{
-                    maxWidth: 440,
                     width: '100%',
-                    borderRadius: 4,
-                    p: { xs: 3, sm: 5 },
-                    background: cardBg,
-                    backdropFilter: 'blur(18px)',
-                    boxShadow: theme.palette.mode === 'dark'
-                        ? '0 16px 48px 0 rgba(0,0,0,0.5)'
-                        : '0 16px 48px 0 rgba(33,147,176,0.15)',
+                    maxWidth: 380,
+                    bgcolor: 'background.paper',
+                    border: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.08)'}`,
+                    borderRadius: 2,
+                    p: { xs: 3, sm: 4 },
                 }}
             >
-                <Box display="flex" alignItems="center" gap={1.5} mb={1}>
-                    <LockResetRoundedIcon sx={{ color: 'primary.main', fontSize: 32 }} />
-                    <Typography variant="h5" fontWeight={900} color="primary">
-                        Forgot Password
-                    </Typography>
-                </Box>
-                <Typography variant="body2" color="text.secondary" mb={3}>
+                <Typography variant="h5" fontWeight={700} letterSpacing="-0.02em" mb={0.5}>
+                    Reset password
+                </Typography>
+                <Typography fontSize={13} color="text.secondary" mb={3}>
                     Enter your email and we'll send you a reset link.
                 </Typography>
-                <Divider sx={{ mb: 3 }} />
 
                 {result && (
-                    <Alert severity={result.type} sx={{ mb: 2, borderRadius: 2 }}>
+                    <Alert severity={result.type} sx={{ mb: 2, borderRadius: 1.5, fontSize: 13 }}>
                         {result.message}
                         {result.resetUrl && (
                             <Box mt={1}>
-                                <Typography fontSize={12} fontWeight={700}>Dev mode — copy your reset link:</Typography>
+                                <Typography fontSize={11} fontWeight={600} mb={0.5}>Dev mode — reset link:</Typography>
                                 <Box
                                     component="a"
                                     href={result.resetUrl}
@@ -90,43 +72,42 @@ const ForgotPassword = () => {
                 )}
 
                 <form onSubmit={handleSubmit}>
-                    <TextField
-                        label="Email"
-                        type="email"
-                        fullWidth
-                        required
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                        sx={{ mb: 3 }}
-                        InputProps={{ sx: { borderRadius: 2, bgcolor: inputBg } }}
-                    />
+                    <Box mb={2.5}>
+                        <Typography fontSize={12} fontWeight={500} color="text.secondary" mb={0.75} letterSpacing="0.02em">
+                            EMAIL
+                        </Typography>
+                        <TextField
+                            type="email"
+                            fullWidth
+                            required
+                            placeholder="you@example.com"
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
+                        />
+                    </Box>
                     <Button
                         type="submit"
                         variant="contained"
                         fullWidth
-                        size="large"
                         disabled={loading}
-                        sx={{
-                            borderRadius: 2,
-                            fontWeight: 700,
-                            py: 1.4,
-                            textTransform: 'none',
-                            fontSize: 15,
-                            background: 'linear-gradient(90deg, #6dd5ed 0%, #2193b0 100%)',
-                            '&:hover': { background: 'linear-gradient(90deg, #2193b0 0%, #6dd5ed 100%)' },
-                        }}
+                        sx={{ py: 1.1, fontWeight: 600 }}
                     >
-                        {loading ? 'Sending...' : 'Send Reset Link'}
-                    </Button>
-                    <Button
-                        fullWidth
-                        onClick={() => nav('/login')}
-                        sx={{ mt: 2, borderRadius: 2, fontWeight: 600, textTransform: 'none', color: 'primary.main' }}
-                    >
-                        Back to Sign In
+                        {loading ? 'Sending…' : 'Send reset link'}
                     </Button>
                 </form>
-            </Paper>
+
+                <Box mt={2.5} textAlign="center">
+                    <Link
+                        component="button"
+                        onClick={() => nav('/login')}
+                        fontSize={13}
+                        color="text.secondary"
+                        underline="hover"
+                    >
+                        ← Back to sign in
+                    </Link>
+                </Box>
+            </Box>
         </Box>
     );
 };

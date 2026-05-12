@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import {
-    Box, Paper, Typography, TextField, Button, Divider, useTheme,
+    Box, Typography, TextField, Button, Link, useTheme,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
-import registerArt from '../assests/images/RegisterPage.png';
 
 const Register = () => {
     const [form, setForm] = useState({ name: '', email: '', password: '' });
@@ -14,12 +13,7 @@ const Register = () => {
     const nav = useNavigate();
     const theme = useTheme();
     const { login } = useAuth();
-
-    const glassBg = theme.palette.mode === 'dark'
-        ? 'linear-gradient(120deg, #232526 0%, #414345 100%)'
-        : 'linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%)';
-    const cardBg = theme.palette.mode === 'dark' ? 'rgba(30, 37, 51, 0.98)' : 'rgba(255,255,255,0.95)';
-    const inputBg = theme.palette.mode === 'dark' ? 'rgba(44,62,80,0.88)' : '#f8fbff';
+    const dark = theme.palette.mode === 'dark';
 
     const handleSubmit = async e => {
         e.preventDefault();
@@ -28,7 +22,7 @@ const Register = () => {
         try {
             const { data } = await axios.post('/api/auth/register', form);
             login(data.token);
-            toast.success('Account created!');
+            toast.success('Welcome to TaskFlow');
             window.location.href = '/';
         } catch (err) {
             toast.error(err.response?.data?.message || 'Registration failed');
@@ -37,118 +31,103 @@ const Register = () => {
         }
     };
 
+    const fields = [
+        { key: 'name', label: 'FULL NAME', type: 'text', placeholder: 'Your name' },
+        { key: 'email', label: 'EMAIL', type: 'email', placeholder: 'you@example.com' },
+        { key: 'password', label: 'PASSWORD', type: 'password', placeholder: '••••••••  (min 6 chars)' },
+    ];
+
     return (
-        <Box
-            sx={{
-                minHeight: '100vh',
-                background: glassBg,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                p: 2,
-                transition: 'background 0.4s',
-            }}
-        >
-            <Paper
-                elevation={8}
+        <Box sx={{ minHeight: '100vh', display: 'flex', bgcolor: 'background.default' }}>
+            {/* Left panel */}
+            <Box
                 sx={{
-                    display: 'flex',
-                    flexDirection: { xs: 'column', md: 'row' },
-                    minHeight: { md: 480 },
-                    maxWidth: 920,
-                    width: '100%',
-                    borderRadius: 4,
-                    overflow: 'hidden',
-                    background: cardBg,
-                    backdropFilter: 'blur(18px)',
-                    boxShadow: theme.palette.mode === 'dark'
-                        ? '0 16px 48px 0 rgba(0,0,0,0.5)'
-                        : '0 16px 48px 0 rgba(33,147,176,0.15)',
+                    display: { xs: 'none', md: 'flex' },
+                    flex: 1,
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    p: 5,
+                    background: dark
+                        ? 'linear-gradient(160deg, #0d1424 0%, #070c18 100%)'
+                        : 'linear-gradient(160deg, #1e1b4b 0%, #312e81 100%)',
+                    borderRight: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.1)'}`,
                 }}
             >
-                <Box
-                    sx={{
-                        flex: 1.2,
-                        background: 'linear-gradient(135deg, #6dd5ed 0%, #2193b0 100%)',
-                        display: { xs: 'none', md: 'flex' },
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        p: 4,
-                    }}
-                >
-                    <img
-                        src={registerArt}
-                        alt="TaskFlow"
-                        style={{ maxWidth: '100%', maxHeight: 340, objectFit: 'contain' }}
-                    />
+                <Typography fontWeight={700} fontSize={17} letterSpacing="-0.02em" color="#fff">
+                    TaskFlow
+                </Typography>
+                <Box>
+                    <Typography variant="h2" fontWeight={700} color="#fff" sx={{ lineHeight: 1.15, mb: 2, maxWidth: 380 }}>
+                        Join your team.<br />Start shipping.
+                    </Typography>
+                    <Typography fontSize={15} color="rgba(255,255,255,0.5)" maxWidth={320}>
+                        Set up your account in seconds and collaborate with your team from day one.
+                    </Typography>
                 </Box>
+                <Typography fontSize={12} color="rgba(255,255,255,0.25)">
+                    © {new Date().getFullYear()} TaskFlow
+                </Typography>
+            </Box>
 
-                <Box
-                    sx={{
-                        flex: 1,
-                        p: { xs: 3, sm: 5 },
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        minWidth: 300,
-                    }}
-                >
-                    <Typography variant="h4" fontWeight={900} color="primary" sx={{ letterSpacing: -1.5 }}>
-                        Create Account
+            {/* Right panel */}
+            <Box
+                sx={{
+                    flex: { xs: 1, md: '0 0 420px' },
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    px: { xs: 3, sm: 6 },
+                    py: 6,
+                    bgcolor: 'background.paper',
+                }}
+            >
+                <Box sx={{ maxWidth: 340, width: '100%', mx: 'auto' }}>
+                    <Typography variant="h5" fontWeight={700} letterSpacing="-0.02em" mb={0.5}>
+                        Create account
                     </Typography>
-                    <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3, mt: 0.5 }}>
-                        Join TaskFlow today
+                    <Typography fontSize={13} color="text.secondary" mb={4}>
+                        Already have one?{' '}
+                        <Link
+                            component="button"
+                            onClick={() => nav('/login')}
+                            fontSize={13}
+                            fontWeight={500}
+                            color="primary.main"
+                            underline="hover"
+                        >
+                            Sign in
+                        </Link>
                     </Typography>
-                    <Divider sx={{ mb: 3 }} />
+
                     <form onSubmit={handleSubmit}>
-                        {[
-                            { label: 'Full Name', key: 'name', type: 'text', placeholder: 'Your full name' },
-                            { label: 'Email', key: 'email', type: 'email', placeholder: 'you@example.com' },
-                            { label: 'Password (min 6 chars)', key: 'password', type: 'password', placeholder: 'Create a password' },
-                        ].map(field => (
-                            <TextField
-                                key={field.key}
-                                label={field.label}
-                                type={field.type}
-                                placeholder={field.placeholder}
-                                fullWidth
-                                required
-                                value={form[field.key]}
-                                onChange={e => setForm({ ...form, [field.key]: e.target.value })}
-                                sx={{ mb: 2 }}
-                                InputProps={{ sx: { borderRadius: 2, bgcolor: inputBg } }}
-                            />
+                        {fields.map(f => (
+                            <Box key={f.key} mb={2}>
+                                <Typography fontSize={12} fontWeight={500} color="text.secondary" mb={0.75} letterSpacing="0.02em">
+                                    {f.label}
+                                </Typography>
+                                <TextField
+                                    type={f.type}
+                                    fullWidth
+                                    required
+                                    placeholder={f.placeholder}
+                                    value={form[f.key]}
+                                    onChange={e => setForm({ ...form, [f.key]: e.target.value })}
+                                />
+                            </Box>
                         ))}
+
                         <Button
                             type="submit"
                             variant="contained"
                             fullWidth
-                            size="large"
                             disabled={loading}
-                            sx={{
-                                borderRadius: 2,
-                                fontWeight: 700,
-                                py: 1.4,
-                                textTransform: 'none',
-                                fontSize: 16,
-                                mt: 1,
-                                background: 'linear-gradient(90deg, #6dd5ed 0%, #2193b0 100%)',
-                                '&:hover': { background: 'linear-gradient(90deg, #2193b0 0%, #6dd5ed 100%)' },
-                            }}
+                            sx={{ py: 1.1, fontSize: 14, fontWeight: 600, mt: 1 }}
                         >
-                            {loading ? 'Creating account...' : 'Create Account'}
-                        </Button>
-                        <Button
-                            fullWidth
-                            onClick={() => nav('/login')}
-                            sx={{ mt: 2, borderRadius: 2, fontWeight: 600, textTransform: 'none', color: 'primary.main' }}
-                        >
-                            Already have an account?{' '}
-                            <Box component="span" sx={{ fontWeight: 800, ml: 0.5 }}>Sign In</Box>
+                            {loading ? 'Creating account…' : 'Create account'}
                         </Button>
                     </form>
                 </Box>
-            </Paper>
+            </Box>
         </Box>
     );
 };

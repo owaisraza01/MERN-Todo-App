@@ -1,30 +1,24 @@
 import React from 'react';
-import { Box, TextField, MenuItem, Button, Chip, useTheme } from '@mui/material';
-import FilterListRoundedIcon from '@mui/icons-material/FilterListRounded';
-import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
+import { Box, TextField, MenuItem, Button, Typography } from '@mui/material';
+import TuneRoundedIcon from '@mui/icons-material/TuneRounded';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 
 const STATUSES = [
     { value: 'pending', label: 'Pending' },
     { value: 'in-progress', label: 'In Progress' },
     { value: 'completed', label: 'Completed' },
 ];
-
 const PRIORITIES = [
     { value: 'low', label: 'Low' },
     { value: 'medium', label: 'Medium' },
     { value: 'high', label: 'High' },
 ];
 
-const selectSx = {
-    minWidth: 130,
-    '& .MuiInputBase-root': { borderRadius: 2, fontSize: 14 },
-};
+const selectSx = { minWidth: 130 };
 
 const TaskFilterBar = ({ filters, onChange, users = [] }) => {
-    const theme = useTheme();
     const hasFilters = filters.status || filters.priority || filters.assignedTo;
-
-    const set = (key) => (e) => onChange({ ...filters, [key]: e.target.value });
+    const set = key => e => onChange({ ...filters, [key]: e.target.value });
     const clear = () => onChange({ status: '', priority: '', assignedTo: '' });
 
     return (
@@ -34,73 +28,56 @@ const TaskFilterBar = ({ filters, onChange, users = [] }) => {
                 alignItems: 'center',
                 gap: 1.5,
                 flexWrap: 'wrap',
-                p: 1.5,
-                borderRadius: 2,
-                bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(33,147,176,0.04)',
-                border: '1px solid',
-                borderColor: 'divider',
                 mb: 2,
             }}
         >
-            <FilterListRoundedIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+            <TuneRoundedIcon sx={{ fontSize: 16, color: 'text.secondary', flexShrink: 0 }} />
 
-            <TextField
-                select
-                size="small"
-                label="Status"
-                value={filters.status}
-                onChange={set('status')}
-                sx={selectSx}
-            >
-                <MenuItem value="">All</MenuItem>
-                {STATUSES.map(s => <MenuItem key={s.value} value={s.value}>{s.label}</MenuItem>)}
+            <TextField select size="small" label="Status" value={filters.status} onChange={set('status')} sx={selectSx}>
+                <MenuItem value=""><Typography fontSize={13} color="text.secondary">All statuses</Typography></MenuItem>
+                {STATUSES.map(s => <MenuItem key={s.value} value={s.value}><Typography fontSize={13}>{s.label}</Typography></MenuItem>)}
             </TextField>
 
-            <TextField
-                select
-                size="small"
-                label="Priority"
-                value={filters.priority}
-                onChange={set('priority')}
-                sx={selectSx}
-            >
-                <MenuItem value="">All</MenuItem>
-                {PRIORITIES.map(p => <MenuItem key={p.value} value={p.value}>{p.label}</MenuItem>)}
+            <TextField select size="small" label="Priority" value={filters.priority} onChange={set('priority')} sx={selectSx}>
+                <MenuItem value=""><Typography fontSize={13} color="text.secondary">All priorities</Typography></MenuItem>
+                {PRIORITIES.map(p => <MenuItem key={p.value} value={p.value}><Typography fontSize={13}>{p.label}</Typography></MenuItem>)}
             </TextField>
 
-            <TextField
-                select
-                size="small"
-                label="Assignee"
-                value={filters.assignedTo}
-                onChange={set('assignedTo')}
-                sx={{ minWidth: 150, '& .MuiInputBase-root': { borderRadius: 2, fontSize: 14 } }}
-            >
-                <MenuItem value="">All</MenuItem>
+            <TextField select size="small" label="Assignee" value={filters.assignedTo} onChange={set('assignedTo')} sx={{ minWidth: 150 }}>
+                <MenuItem value=""><Typography fontSize={13} color="text.secondary">All members</Typography></MenuItem>
                 {users.map(u => (
-                    <MenuItem key={u._id} value={u._id}>{u.name || u.email}</MenuItem>
+                    <MenuItem key={u._id} value={u._id}>
+                        <Typography fontSize={13}>{u.name || u.email}</Typography>
+                    </MenuItem>
                 ))}
             </TextField>
 
             {hasFilters && (
                 <Button
                     size="small"
-                    startIcon={<ClearRoundedIcon />}
+                    startIcon={<CloseRoundedIcon sx={{ fontSize: 14 }} />}
                     onClick={clear}
-                    sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600, color: 'error.main' }}
+                    sx={{ color: 'text.secondary', fontSize: 12 }}
                 >
                     Clear
                 </Button>
             )}
 
             {hasFilters && (
-                <Chip
-                    label="Filters active"
-                    size="small"
-                    color="primary"
-                    variant="outlined"
-                    sx={{ fontWeight: 600 }}
-                />
+                <Box
+                    sx={{
+                        px: 1,
+                        py: 0.3,
+                        borderRadius: 1,
+                        fontSize: 11,
+                        fontWeight: 600,
+                        letterSpacing: '0.04em',
+                        color: '#6366f1',
+                        bgcolor: 'rgba(99,102,241,0.1)',
+                    }}
+                >
+                    FILTERED
+                </Box>
             )}
         </Box>
     );

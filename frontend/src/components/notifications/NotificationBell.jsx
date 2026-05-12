@@ -1,86 +1,94 @@
 import React, { useState } from 'react';
 import {
-    IconButton, Badge, Popover, Box, Typography, List, ListItem,
-    ListItemText, Divider, Button, Chip, CircularProgress, useTheme,
+    IconButton, Badge, Popover, Box, Typography, Divider,
+    Button, CircularProgress, useTheme,
 } from '@mui/material';
-import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
-import NotificationsNoneRoundedIcon from '@mui/icons-material/NotificationsNoneRounded';
+import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import DoneAllRoundedIcon from '@mui/icons-material/DoneAllRounded';
 import { useNotifications } from '../../hooks/useNotifications';
 
-const TYPE_COLORS = {
-    task_assigned: 'primary',
-    comment_added: 'info',
-    status_changed: 'success',
+const TYPE_COLOR = {
+    task_assigned: '#6366f1',
+    comment_added: '#06b6d4',
+    status_changed: '#10b981',
 };
 
-const timeAgo = (date) => {
-    const diff = (Date.now() - new Date(date)) / 1000;
-    if (diff < 60) return 'just now';
-    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-    return `${Math.floor(diff / 86400)}d ago`;
+const timeAgo = date => {
+    const s = (Date.now() - new Date(date)) / 1000;
+    if (s < 60) return 'now';
+    if (s < 3600) return `${Math.floor(s / 60)}m`;
+    if (s < 86400) return `${Math.floor(s / 3600)}h`;
+    return `${Math.floor(s / 86400)}d`;
 };
 
 const NotificationBell = () => {
     const theme = useTheme();
-    const [anchorEl, setAnchorEl] = useState(null);
+    const dark = theme.palette.mode === 'dark';
+    const [anchor, setAnchor] = useState(null);
     const { notifications, loading, refresh, markRead, markAllRead } = useNotifications();
 
-    const open = Boolean(anchorEl);
-    const unreadCount = notifications.filter(n => !n.read).length;
+    const open = Boolean(anchor);
+    const unread = notifications.filter(n => !n.read).length;
 
-    const handleOpen = async (e) => {
-        setAnchorEl(e.currentTarget);
+    const handleOpen = async e => {
+        setAnchor(e.currentTarget);
         await refresh();
     };
 
     return (
         <>
-            <IconButton
-                onClick={handleOpen}
-                sx={{ color: open ? 'primary.main' : 'text.secondary', transition: 'color 0.2s' }}
-            >
-                <Badge badgeContent={unreadCount} color="error" max={9}>
-                    {unreadCount > 0
-                        ? <NotificationsRoundedIcon />
-                        : <NotificationsNoneRoundedIcon />
-                    }
+            <IconButton size="small" onClick={handleOpen} sx={{ color: 'text.secondary', borderRadius: 1.5 }}>
+                <Badge
+                    badgeContent={unread}
+                    color="error"
+                    max={9}
+                    sx={{ '& .MuiBadge-badge': { fontSize: 9, minWidth: 14, height: 14, padding: '0 3px' } }}
+                >
+                    <NotificationsOutlinedIcon sx={{ fontSize: 18 }} />
                 </Badge>
             </IconButton>
 
             <Popover
                 open={open}
-                anchorEl={anchorEl}
-                onClose={() => setAnchorEl(null)}
+                anchorEl={anchor}
+                onClose={() => setAnchor(null)}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                 transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                 PaperProps={{
                     sx: {
-                        width: 340,
-                        borderRadius: 3,
-                        boxShadow: theme.palette.mode === 'dark'
-                            ? '0 8px 32px rgba(0,0,0,0.5)'
-                            : '0 8px 32px rgba(33,147,176,0.15)',
-                        border: '1px solid',
-                        borderColor: 'divider',
-                        bgcolor: theme.palette.mode === 'dark' ? '#1e2533' : '#fff',
+                        width: 320,
+                        mt: 0.5,
+                        backgroundImage: 'none',
+                        bgcolor: dark ? '#0d1424' : '#fff',
                     },
                 }}
             >
-                <Box sx={{ px: 2.5, py: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Typography fontWeight={800} fontSize={15}>
-                        Notifications
-                        {unreadCount > 0 && (
-                            <Chip label={unreadCount} size="small" color="error" sx={{ ml: 1, height: 18, fontSize: 11, fontWeight: 700 }} />
+                {/* Header */}
+                <Box sx={{ px: 2, py: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Box display="flex" alignItems="center" gap={1}>
+                        <Typography fontSize={13} fontWeight={600}>Notifications</Typography>
+                        {unread > 0 && (
+                            <Box
+                                sx={{
+                                    px: 0.875,
+                                    py: 0.1,
+                                    borderRadius: 0.75,
+                                    fontSize: 11,
+                                    fontWeight: 700,
+                                    color: '#ef4444',
+                                    bgcolor: 'rgba(239,68,68,0.12)',
+                                }}
+                            >
+                                {unread}
+                            </Box>
                         )}
-                    </Typography>
-                    {unreadCount > 0 && (
+                    </Box>
+                    {unread > 0 && (
                         <Button
                             size="small"
-                            startIcon={<DoneAllRoundedIcon />}
                             onClick={markAllRead}
-                            sx={{ textTransform: 'none', fontWeight: 600, fontSize: 12 }}
+                            startIcon={<DoneAllRoundedIcon sx={{ fontSize: 14 }} />}
+                            sx={{ fontSize: 11, color: 'text.secondary', py: 0.3 }}
                         >
                             Mark all read
                         </Button>
@@ -91,65 +99,57 @@ const NotificationBell = () => {
 
                 {loading ? (
                     <Box display="flex" justifyContent="center" py={4}>
-                        <CircularProgress size={24} />
+                        <CircularProgress size={20} />
                     </Box>
                 ) : notifications.length === 0 ? (
                     <Box py={5} textAlign="center">
-                        <NotificationsNoneRoundedIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
-                        <Typography variant="body2" color="text.disabled">No notifications yet</Typography>
+                        <NotificationsOutlinedIcon sx={{ fontSize: 28, color: 'text.disabled', mb: 1 }} />
+                        <Typography fontSize={13} color="text.disabled">No notifications</Typography>
                     </Box>
                 ) : (
-                    <List disablePadding sx={{ maxHeight: 380, overflowY: 'auto' }}>
+                    <Box sx={{ maxHeight: 360, overflowY: 'auto' }}>
                         {notifications.map((n, i) => (
-                            <React.Fragment key={n._id}>
-                                <ListItem
-                                    alignItems="flex-start"
+                            <Box key={n._id}>
+                                <Box
                                     onClick={() => markRead(n._id)}
                                     sx={{
-                                        cursor: 'pointer',
-                                        px: 2.5,
+                                        px: 2,
                                         py: 1.5,
-                                        bgcolor: n.read
-                                            ? 'transparent'
-                                            : theme.palette.mode === 'dark'
-                                                ? 'rgba(109,213,237,0.06)'
-                                                : 'rgba(33,147,176,0.05)',
-                                        '&:hover': { bgcolor: 'action.hover' },
-                                        transition: 'background 0.2s',
+                                        display: 'flex',
+                                        gap: 1.5,
+                                        cursor: 'pointer',
+                                        bgcolor: n.read ? 'transparent' : (dark ? 'rgba(99,102,241,0.06)' : 'rgba(99,102,241,0.04)'),
+                                        '&:hover': { bgcolor: dark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.03)' },
+                                        transition: 'background 0.12s',
                                     }}
                                 >
-                                    <Box sx={{ display: 'flex', gap: 1.5, width: '100%' }}>
-                                        {!n.read && (
-                                            <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'primary.main', flexShrink: 0, mt: 0.75 }} />
-                                        )}
-                                        <Box sx={{ flex: 1, ml: n.read ? 2 : 0 }}>
-                                            <ListItemText
-                                                primary={
-                                                    <Typography fontSize={13} fontWeight={n.read ? 400 : 600} lineHeight={1.4}>
-                                                        {n.message}
-                                                    </Typography>
-                                                }
-                                                secondary={
-                                                    <Box display="flex" alignItems="center" gap={1} mt={0.5}>
-                                                        <Chip
-                                                            label={n.type.replace('_', ' ')}
-                                                            size="small"
-                                                            color={TYPE_COLORS[n.type] || 'default'}
-                                                            sx={{ height: 16, fontSize: 10, fontWeight: 700, textTransform: 'capitalize' }}
-                                                        />
-                                                        <Typography fontSize={11} color="text.disabled">
-                                                            {timeAgo(n.createdAt)}
-                                                        </Typography>
-                                                    </Box>
-                                                }
-                                            />
-                                        </Box>
+                                    <Box
+                                        sx={{
+                                            width: 3,
+                                            borderRadius: 1,
+                                            flexShrink: 0,
+                                            alignSelf: 'stretch',
+                                            bgcolor: n.read ? 'transparent' : (TYPE_COLOR[n.type] || '#6366f1'),
+                                        }}
+                                    />
+                                    <Box flex={1} minWidth={0}>
+                                        <Typography
+                                            fontSize={12.5}
+                                            fontWeight={n.read ? 400 : 500}
+                                            lineHeight={1.45}
+                                            color={n.read ? 'text.secondary' : 'text.primary'}
+                                        >
+                                            {n.message}
+                                        </Typography>
+                                        <Typography fontSize={11} color="text.disabled" mt={0.4}>
+                                            {timeAgo(n.createdAt)} ago · {n.type.replace('_', ' ')}
+                                        </Typography>
                                     </Box>
-                                </ListItem>
+                                </Box>
                                 {i < notifications.length - 1 && <Divider />}
-                            </React.Fragment>
+                            </Box>
                         ))}
-                    </List>
+                    </Box>
                 )}
             </Popover>
         </>

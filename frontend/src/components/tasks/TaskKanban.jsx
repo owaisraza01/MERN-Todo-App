@@ -1,109 +1,112 @@
 import React from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import {
-    Box, Card, CardContent, Typography, Chip, Stack, Avatar, useTheme,
-} from '@mui/material';
-import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
-import FlagRoundedIcon from '@mui/icons-material/FlagRounded';
+import { Box, Typography, Avatar, Stack, useTheme } from '@mui/material';
 
 const COLUMNS = [
-    { id: 'pending', label: 'Pending', color: '#f5576c', bg: 'rgba(245,87,108,0.08)' },
-    { id: 'in-progress', label: 'In Progress', color: '#4facfe', bg: 'rgba(79,172,254,0.08)' },
-    { id: 'completed', label: 'Completed', color: '#43e97b', bg: 'rgba(67,233,123,0.08)' },
+    { id: 'pending',     label: 'Pending',     color: '#f59e0b' },
+    { id: 'in-progress', label: 'In Progress',  color: '#6366f1' },
+    { id: 'completed',   label: 'Completed',    color: '#10b981' },
 ];
 
-const PRIORITY_COLORS = { low: 'default', medium: 'warning', high: 'error' };
+const PRIORITY_COLORS = {
+    low:    { color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
+    medium: { color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
+    high:   { color: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
+};
 
 const TaskCard = ({ task, index, onClick }) => {
     const theme = useTheme();
-    const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
+    const dark = theme.palette.mode === 'dark';
+    const overdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
+    const pStyle = PRIORITY_COLORS[task.priority] || { color: '#64748b', bg: 'transparent' };
 
     return (
         <Draggable draggableId={task._id} index={index}>
             {(provided, snapshot) => (
-                <Card
+                <Box
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
                     onClick={() => onClick(task)}
-                    elevation={snapshot.isDragging ? 8 : 0}
                     sx={{
                         mb: 1.5,
-                        borderRadius: 2,
-                        border: '1px solid',
-                        borderColor: snapshot.isDragging
-                            ? 'primary.main'
-                            : theme.palette.divider,
+                        p: 1.75,
+                        borderRadius: 1.5,
+                        border: `1px solid ${snapshot.isDragging
+                            ? 'rgba(99,102,241,0.4)'
+                            : dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.08)'}`,
+                        bgcolor: snapshot.isDragging
+                            ? (dark ? '#151d2f' : '#f8faff')
+                            : theme.palette.background.paper,
                         cursor: 'grab',
-                        transition: 'box-shadow 0.2s, border-color 0.2s',
-                        bgcolor: theme.palette.mode === 'dark' ? '#1e2533' : '#fff',
-                        '&:hover': { borderColor: 'primary.light' },
+                        boxShadow: snapshot.isDragging
+                            ? (dark ? '0 8px 24px rgba(0,0,0,0.4)' : '0 8px 24px rgba(15,23,42,0.12)')
+                            : 'none',
+                        transition: 'border-color 0.15s, box-shadow 0.15s',
+                        '&:hover': {
+                            borderColor: 'rgba(99,102,241,0.3)',
+                        },
                         '&:active': { cursor: 'grabbing' },
                     }}
                 >
-                    <CardContent sx={{ p: '12px !important' }}>
-                        <Typography
-                            fontSize={14}
-                            fontWeight={600}
-                            sx={{ mb: 1, lineHeight: 1.4 }}
-                        >
-                            {task.title}
-                        </Typography>
+                    <Typography fontSize={13} fontWeight={500} sx={{ mb: 1.5, lineHeight: 1.45 }}>
+                        {task.title}
+                    </Typography>
 
-                        <Stack direction="row" spacing={0.75} flexWrap="wrap" sx={{ mb: 1 }}>
-                            <Chip
-                                icon={<FlagRoundedIcon sx={{ fontSize: '12px !important' }} />}
-                                label={task.priority}
-                                color={PRIORITY_COLORS[task.priority]}
-                                size="small"
-                                sx={{ fontSize: 11, fontWeight: 700, textTransform: 'capitalize', height: 22 }}
-                            />
+                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                        <Stack direction="row" spacing={0.75} alignItems="center">
+                            <Box
+                                sx={{
+                                    px: 0.875,
+                                    py: 0.25,
+                                    borderRadius: 0.75,
+                                    fontSize: 11,
+                                    fontWeight: 600,
+                                    letterSpacing: '0.03em',
+                                    color: pStyle.color,
+                                    bgcolor: pStyle.bg,
+                                    textTransform: 'capitalize',
+                                }}
+                            >
+                                {task.priority}
+                            </Box>
                             {task.subtasks?.length > 0 && (
-                                <Chip
-                                    label={`${task.subtasks.filter(s => s.completed).length}/${task.subtasks.length}`}
-                                    size="small"
-                                    sx={{ fontSize: 11, height: 22 }}
-                                />
+                                <Typography fontSize={11} color="text.secondary">
+                                    {task.subtasks.filter(s => s.completed).length}/{task.subtasks.length}
+                                </Typography>
                             )}
                         </Stack>
 
-                        <Box display="flex" justifyContent="space-between" alignItems="center">
+                        <Stack direction="row" spacing={-0.5} alignItems="center">
                             {task.dueDate && (
-                                <Box display="flex" alignItems="center" gap={0.5}>
-                                    <CalendarTodayRoundedIcon
-                                        sx={{ fontSize: 12, color: isOverdue ? 'error.main' : 'text.disabled' }}
-                                    />
-                                    <Typography
-                                        fontSize={11}
-                                        color={isOverdue ? 'error.main' : 'text.secondary'}
-                                        fontWeight={isOverdue ? 700 : 400}
-                                    >
-                                        {new Date(task.dueDate).toLocaleDateString()}
-                                    </Typography>
-                                </Box>
+                                <Typography
+                                    fontSize={11}
+                                    fontWeight={overdue ? 600 : 400}
+                                    color={overdue ? 'error.main' : 'text.secondary'}
+                                    mr={0.75}
+                                    sx={{ fontVariantNumeric: 'tabular-nums' }}
+                                >
+                                    {new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                </Typography>
                             )}
-                            <Stack direction="row" spacing={-0.5} sx={{ ml: 'auto' }}>
-                                {(task.assignedTo || []).slice(0, 3).map(u => (
-                                    <Avatar
-                                        key={u._id}
-                                        src={u.avatar}
-                                        sx={{
-                                            width: 22,
-                                            height: 22,
-                                            fontSize: 10,
-                                            fontWeight: 700,
-                                            border: '2px solid',
-                                            borderColor: 'background.paper',
-                                            background: 'linear-gradient(135deg, #6dd5ed, #2193b0)',
-                                        }}
-                                    >
-                                        {(u.name || u.email || 'U')[0]}
-                                    </Avatar>
-                                ))}
-                            </Stack>
-                        </Box>
-                    </CardContent>
-                </Card>
+                            {(task.assignedTo || []).slice(0, 2).map(u => (
+                                <Avatar
+                                    key={u._id}
+                                    sx={{
+                                        width: 20,
+                                        height: 20,
+                                        fontSize: 9,
+                                        fontWeight: 700,
+                                        bgcolor: '#6366f1',
+                                        border: `2px solid ${theme.palette.background.paper}`,
+                                    }}
+                                >
+                                    {(u.name || u.email || 'U')[0]}
+                                </Avatar>
+                            ))}
+                        </Stack>
+                    </Box>
+                </Box>
             )}
         </Draggable>
     );
@@ -111,55 +114,57 @@ const TaskCard = ({ task, index, onClick }) => {
 
 const TaskKanban = ({ tasks, onStatusChange, onTaskClick }) => {
     const theme = useTheme();
+    const dark = theme.palette.mode === 'dark';
 
-    const handleDragEnd = (result) => {
-        const { destination, source, draggableId } = result;
+    const handleDragEnd = ({ destination, source, draggableId }) => {
         if (!destination) return;
         if (destination.droppableId === source.droppableId && destination.index === source.index) return;
         onStatusChange(draggableId, destination.droppableId);
     };
 
-    const tasksByStatus = (status) => tasks.filter(t => t.status === status);
-
     return (
         <DragDropContext onDragEnd={handleDragEnd}>
             <Box sx={{ display: 'flex', gap: 2, overflowX: 'auto', pb: 2, minHeight: 400 }}>
                 {COLUMNS.map(col => {
-                    const colTasks = tasksByStatus(col.id);
+                    const colTasks = tasks.filter(t => t.status === col.id);
                     return (
-                        <Box key={col.id} sx={{ flex: 1, minWidth: 280 }}>
+                        <Box key={col.id} sx={{ flex: 1, minWidth: 260 }}>
+                            {/* Column header */}
                             <Box
                                 sx={{
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: 1,
+                                    gap: 1.5,
                                     mb: 1.5,
-                                    px: 1,
+                                    px: 0.5,
                                 }}
                             >
                                 <Box
                                     sx={{
-                                        width: 10,
-                                        height: 10,
+                                        width: 8,
+                                        height: 8,
                                         borderRadius: '50%',
                                         bgcolor: col.color,
                                         flexShrink: 0,
                                     }}
                                 />
-                                <Typography fontWeight={700} fontSize={14}>
-                                    {col.label}
+                                <Typography fontSize={12} fontWeight={600} letterSpacing="0.05em" color="text.secondary">
+                                    {col.label.toUpperCase()}
                                 </Typography>
-                                <Chip
-                                    label={colTasks.length}
-                                    size="small"
+                                <Box
                                     sx={{
-                                        height: 20,
-                                        fontSize: 12,
+                                        ml: 'auto',
+                                        px: 1,
+                                        py: 0.1,
+                                        borderRadius: 0.75,
+                                        fontSize: 11,
                                         fontWeight: 700,
-                                        bgcolor: col.bg,
                                         color: col.color,
+                                        bgcolor: `${col.color}18`,
                                     }}
-                                />
+                                >
+                                    {colTasks.length}
+                                </Box>
                             </Box>
 
                             <Droppable droppableId={col.id}>
@@ -169,18 +174,15 @@ const TaskKanban = ({ tasks, onStatusChange, onTaskClick }) => {
                                         {...provided.droppableProps}
                                         sx={{
                                             minHeight: 200,
-                                            borderRadius: 3,
                                             p: 1,
-                                            bgcolor: snapshot.isDraggingOver
-                                                ? col.bg
-                                                : theme.palette.mode === 'dark'
-                                                    ? 'rgba(255,255,255,0.02)'
-                                                    : 'rgba(0,0,0,0.02)',
-                                            border: '2px dashed',
-                                            borderColor: snapshot.isDraggingOver
+                                            borderRadius: 1.5,
+                                            border: `1px dashed ${snapshot.isDraggingOver
                                                 ? col.color
+                                                : dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.08)'}`,
+                                            bgcolor: snapshot.isDraggingOver
+                                                ? `${col.color}08`
                                                 : 'transparent',
-                                            transition: 'all 0.2s',
+                                            transition: 'border-color 0.15s, background 0.15s',
                                         }}
                                     >
                                         {colTasks.map((task, index) => (
@@ -194,11 +196,12 @@ const TaskKanban = ({ tasks, onStatusChange, onTaskClick }) => {
                                         {provided.placeholder}
                                         {colTasks.length === 0 && !snapshot.isDraggingOver && (
                                             <Typography
-                                                variant="caption"
+                                                fontSize={12}
                                                 color="text.disabled"
-                                                sx={{ display: 'block', textAlign: 'center', py: 4 }}
+                                                textAlign="center"
+                                                py={5}
                                             >
-                                                Drop tasks here
+                                                No tasks
                                             </Typography>
                                         )}
                                     </Box>

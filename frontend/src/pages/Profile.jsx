@@ -1,18 +1,34 @@
 import React, { useState } from 'react';
 import {
-    Box, Card, CardContent, Typography, TextField, Button, Avatar,
-    Divider, Stack, Chip, useTheme, InputAdornment, IconButton,
+    Box, Typography, TextField, Button, Avatar,
+    Divider, Stack, InputAdornment, IconButton, useTheme,
 } from '@mui/material';
-import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
-import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
-import LockRoundedIcon from '@mui/icons-material/LockRounded';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
 
+const SectionCard = ({ children }) => {
+    const theme = useTheme();
+    const dark = theme.palette.mode === 'dark';
+    return (
+        <Box
+            sx={{
+                border: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(15,23,42,0.09)'}`,
+                borderRadius: 1.5,
+                p: 3,
+                mb: 2.5,
+                bgcolor: 'background.paper',
+            }}
+        >
+            {children}
+        </Box>
+    );
+};
+
 const Profile = () => {
     const theme = useTheme();
+    const dark = theme.palette.mode === 'dark';
     const { user: tokenUser, authHeader } = useAuth();
 
     const [name, setName] = useState(tokenUser?.name || '');
@@ -22,9 +38,6 @@ const Profile = () => {
     const [showPass, setShowPass] = useState(false);
     const [savingProfile, setSavingProfile] = useState(false);
     const [savingPassword, setSavingPassword] = useState(false);
-
-
-    const inputBg = theme.palette.mode === 'dark' ? 'rgba(44,62,80,0.5)' : '#f8fbff';
 
     const handleSaveProfile = async e => {
         e.preventDefault();
@@ -59,147 +72,138 @@ const Profile = () => {
     };
 
     const initials = (name || tokenUser?.email || 'U')[0].toUpperCase();
+    const isAdmin = tokenUser?.role === 'admin';
 
     return (
-        <Box>
-            <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider', mb: 3 }}>
-                <CardContent sx={{ p: 3 }}>
-                    <Stack direction="row" alignItems="center" gap={1} mb={3}>
-                        <AccountCircleRoundedIcon color="primary" />
-                        <Typography variant="h6" fontWeight={800} color="primary">Profile</Typography>
-                    </Stack>
-
-                    <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" gap={3} mb={3}>
-                        <Avatar
+        <Box maxWidth={640}>
+            {/* Identity card */}
+            <SectionCard>
+                <Stack direction="row" alignItems="center" gap={2.5}>
+                    <Avatar
+                        sx={{
+                            width: 64,
+                            height: 64,
+                            fontSize: 24,
+                            fontWeight: 700,
+                            bgcolor: '#6366f1',
+                            flexShrink: 0,
+                        }}
+                    >
+                        {initials}
+                    </Avatar>
+                    <Box flex={1} minWidth={0}>
+                        <Typography fontWeight={700} fontSize={16} noWrap>
+                            {tokenUser?.name || 'User'}
+                        </Typography>
+                        <Typography fontSize={13} color="text.secondary" noWrap>
+                            {tokenUser?.email}
+                        </Typography>
+                        <Box
                             sx={{
-                                width: 72,
-                                height: 72,
-                                fontSize: 28,
+                                mt: 0.75,
+                                display: 'inline-flex',
+                                px: 0.875,
+                                py: 0.2,
+                                borderRadius: 0.75,
+                                fontSize: 11,
                                 fontWeight: 700,
-                                background: 'linear-gradient(135deg, #6dd5ed, #2193b0)',
-                                flexShrink: 0,
+                                letterSpacing: '0.05em',
+                                color: isAdmin ? '#ef4444' : '#6366f1',
+                                bgcolor: isAdmin ? 'rgba(239,68,68,0.1)' : 'rgba(99,102,241,0.1)',
+                                textTransform: 'uppercase',
                             }}
                         >
-                            {initials}
-                        </Avatar>
-                        <Box>
-                            <Typography fontWeight={700} fontSize={18}>{tokenUser?.name || 'User'}</Typography>
-                            <Typography color="text.secondary" fontSize={14}>{tokenUser?.email}</Typography>
-                            <Stack direction="row" gap={1} mt={0.5}>
-                                <Chip
-                                    label={tokenUser?.role || 'user'}
-                                    size="small"
-                                    color={tokenUser?.role === 'admin' ? 'error' : 'primary'}
-                                    sx={{ fontWeight: 700, textTransform: 'capitalize' }}
-                                />
-                            </Stack>
+                            {tokenUser?.role || 'user'}
                         </Box>
+                    </Box>
+                </Stack>
+            </SectionCard>
+
+            {/* Edit profile */}
+            <SectionCard>
+                <Typography fontSize={11} fontWeight={700} letterSpacing="0.06em" color="text.disabled" mb={2}>
+                    PROFILE INFO
+                </Typography>
+
+                <form onSubmit={handleSaveProfile}>
+                    <Stack direction={{ xs: 'column', sm: 'row' }} gap={2} mb={2}>
+                        <TextField
+                            label="Display Name"
+                            value={name}
+                            onChange={e => setName(e.target.value)}
+                            size="small"
+                            sx={{ flex: 1 }}
+                        />
+                        <TextField
+                            label="Email"
+                            value={tokenUser?.email || ''}
+                            size="small"
+                            disabled
+                            sx={{ flex: 1 }}
+                        />
                     </Stack>
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        disabled={savingProfile}
+                        size="small"
+                        sx={{ fontSize: 13, fontWeight: 600 }}
+                    >
+                        {savingProfile ? 'Saving...' : 'Save Changes'}
+                    </Button>
+                </form>
+            </SectionCard>
 
-                    <Divider sx={{ mb: 3 }} />
+            {/* Change password */}
+            <SectionCard>
+                <Typography fontSize={11} fontWeight={700} letterSpacing="0.06em" color="text.disabled" mb={2}>
+                    CHANGE PASSWORD
+                </Typography>
 
-                    <form onSubmit={handleSaveProfile}>
-                        <Typography fontWeight={700} fontSize={14} mb={2}>Edit Info</Typography>
-                        <Stack direction={{ xs: 'column', sm: 'row' }} gap={2} alignItems="flex-start">
-                            <TextField
-                                label="Display Name"
-                                value={name}
-                                onChange={e => setName(e.target.value)}
-                                size="small"
-                                sx={{ flex: 1 }}
-                                InputProps={{ sx: { borderRadius: 2, bgcolor: inputBg } }}
-                            />
-                            <TextField
-                                label="Email"
-                                value={tokenUser?.email || ''}
-                                size="small"
-                                disabled
-                                sx={{ flex: 1 }}
-                                InputProps={{ sx: { borderRadius: 2 } }}
-                            />
-                        </Stack>
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            startIcon={<SaveRoundedIcon />}
-                            disabled={savingProfile}
-                            sx={{
-                                mt: 2,
-                                borderRadius: 2,
-                                fontWeight: 700,
-                                textTransform: 'none',
-                                background: 'linear-gradient(90deg, #6dd5ed 0%, #2193b0 100%)',
-                                '&:hover': { background: 'linear-gradient(90deg, #2193b0 0%, #6dd5ed 100%)' },
+                <form onSubmit={handleChangePassword}>
+                    <Stack spacing={2} maxWidth={380} mb={2}>
+                        <TextField
+                            label="Current Password"
+                            type={showPass ? 'text' : 'password'}
+                            value={currentPassword}
+                            onChange={e => setCurrentPassword(e.target.value)}
+                            size="small"
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton size="small" onClick={() => setShowPass(v => !v)} tabIndex={-1} edge="end">
+                                            {showPass ? <VisibilityOff sx={{ fontSize: 16 }} /> : <Visibility sx={{ fontSize: 16 }} />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
                             }}
-                        >
-                            {savingProfile ? 'Saving...' : 'Save Changes'}
-                        </Button>
-                    </form>
-                </CardContent>
-            </Card>
-
-            <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
-                <CardContent sx={{ p: 3 }}>
-                    <Stack direction="row" alignItems="center" gap={1} mb={3}>
-                        <LockRoundedIcon color="primary" />
-                        <Typography variant="h6" fontWeight={800} color="primary">Change Password</Typography>
+                        />
+                        <TextField
+                            label="New Password"
+                            type={showPass ? 'text' : 'password'}
+                            value={newPassword}
+                            onChange={e => setNewPassword(e.target.value)}
+                            size="small"
+                        />
+                        <TextField
+                            label="Confirm New Password"
+                            type={showPass ? 'text' : 'password'}
+                            value={confirmPassword}
+                            onChange={e => setConfirmPassword(e.target.value)}
+                            size="small"
+                        />
                     </Stack>
-
-                    <form onSubmit={handleChangePassword}>
-                        <Stack spacing={2} maxWidth={400}>
-                            <TextField
-                                label="Current Password"
-                                type={showPass ? 'text' : 'password'}
-                                value={currentPassword}
-                                onChange={e => setCurrentPassword(e.target.value)}
-                                size="small"
-                                InputProps={{
-                                    sx: { borderRadius: 2, bgcolor: inputBg },
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton size="small" onClick={() => setShowPass(v => !v)} tabIndex={-1}>
-                                                {showPass ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
-                            <TextField
-                                label="New Password"
-                                type={showPass ? 'text' : 'password'}
-                                value={newPassword}
-                                onChange={e => setNewPassword(e.target.value)}
-                                size="small"
-                                InputProps={{ sx: { borderRadius: 2, bgcolor: inputBg } }}
-                            />
-                            <TextField
-                                label="Confirm New Password"
-                                type={showPass ? 'text' : 'password'}
-                                value={confirmPassword}
-                                onChange={e => setConfirmPassword(e.target.value)}
-                                size="small"
-                                InputProps={{ sx: { borderRadius: 2, bgcolor: inputBg } }}
-                            />
-                        </Stack>
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            startIcon={<LockRoundedIcon />}
-                            disabled={savingPassword}
-                            sx={{
-                                mt: 2,
-                                borderRadius: 2,
-                                fontWeight: 700,
-                                textTransform: 'none',
-                                background: 'linear-gradient(90deg, #6dd5ed 0%, #2193b0 100%)',
-                                '&:hover': { background: 'linear-gradient(90deg, #2193b0 0%, #6dd5ed 100%)' },
-                            }}
-                        >
-                            {savingPassword ? 'Updating...' : 'Change Password'}
-                        </Button>
-                    </form>
-                </CardContent>
-            </Card>
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        disabled={savingPassword}
+                        size="small"
+                        sx={{ fontSize: 13, fontWeight: 600 }}
+                    >
+                        {savingPassword ? 'Updating...' : 'Change Password'}
+                    </Button>
+                </form>
+            </SectionCard>
         </Box>
     );
 };
