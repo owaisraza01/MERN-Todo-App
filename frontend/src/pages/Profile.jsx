@@ -38,7 +38,7 @@ const Section = ({ tag, title, children }) => {
 const Profile = () => {
     const theme = useTheme();
     const dark = theme.palette.mode === 'dark';
-    const { user: tokenUser, authHeader } = useAuth();
+    const { user: tokenUser, authHeader, login } = useAuth();
 
     const [name, setName] = useState(tokenUser?.name || '');
     const [currentPassword, setCurrentPassword] = useState('');
@@ -50,10 +50,13 @@ const Profile = () => {
 
     const handleSaveProfile = async e => {
         e.preventDefault();
-        if (!name.trim()) return;
+        const next = name.trim();
+        if (!next) { toast.error('Name cannot be empty'); return; }
+        if (next === tokenUser?.name) { toast('No changes to save'); return; }
         setSavingProfile(true);
         try {
-            await axios.put('/api/users/profile', { name }, { headers: authHeader });
+            const { data } = await axios.put('/api/users/profile', { name: next }, { headers: authHeader });
+            if (data?.token) login(data.token);
             toast.success('Profile updated');
         } catch (err) {
             toast.error(err.response?.data?.message || 'Failed to update profile');
