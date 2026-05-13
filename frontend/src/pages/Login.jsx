@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
-import {
-    Box, Typography, TextField, Button, InputAdornment,
-    IconButton, Divider, useTheme, Link,
-} from '@mui/material';
+import { Box, Typography, TextField, Button, InputAdornment, IconButton, useTheme, Link } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
+import { tokens } from '../theme/theme';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -28,147 +26,149 @@ const Login = () => {
             window.location.href = '/';
         } catch (err) {
             toast.error(err.response?.data?.message || 'Login failed');
-        } finally {
-            setLoading(false);
-        }
+        } finally { setLoading(false); }
     };
 
     return (
-        <Box
-            sx={{
-                minHeight: '100vh',
-                display: 'flex',
-                bgcolor: 'background.default',
-            }}
-        >
-            {/* Left panel */}
+        <Box sx={{ minHeight: '100vh', display: 'flex', bgcolor: 'background.default' }}>
+            {/* Left brand panel */}
             <Box
                 sx={{
                     display: { xs: 'none', md: 'flex' },
                     flex: 1,
                     flexDirection: 'column',
                     justifyContent: 'space-between',
-                    p: 5,
-                    background: dark
-                        ? 'linear-gradient(160deg, #0d1424 0%, #070c18 100%)'
-                        : 'linear-gradient(160deg, #1e1b4b 0%, #312e81 100%)',
-                    borderRight: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.1)'}`,
+                    p: 6,
+                    bgcolor: '#0a0a0d',
+                    color: '#fafafa',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    borderRight: `1px solid rgba(255,255,255,0.06)`,
                 }}
             >
-                <Box>
+                {/* Decorative grid */}
+                <Box
+                    aria-hidden
+                    sx={{
+                        position: 'absolute',
+                        inset: 0,
+                        backgroundImage: `linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)`,
+                        backgroundSize: '48px 48px',
+                        pointerEvents: 'none',
+                    }}
+                />
+                {/* Accent glow */}
+                <Box
+                    aria-hidden
+                    sx={{
+                        position: 'absolute',
+                        bottom: -180,
+                        right: -180,
+                        width: 420,
+                        height: 420,
+                        borderRadius: '50%',
+                        background: 'radial-gradient(circle, rgba(212,255,58,0.18) 0%, transparent 70%)',
+                        pointerEvents: 'none',
+                    }}
+                />
+
+                <Box sx={{ position: 'relative' }}>
+                    <Box display="flex" alignItems="center" gap={1.5}>
+                        <Box sx={{ width: 36, height: 36, border: `1px solid ${tokens.accent}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: tokens.accent, fontFamily: tokens.fontMono, fontWeight: 700, fontSize: 14 }}>
+                            T/
+                        </Box>
+                        <Typography sx={{ fontFamily: tokens.fontMono, fontSize: 12, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+                            Task<Box component="span" sx={{ color: tokens.accent }}>Flow</Box>
+                        </Typography>
+                    </Box>
+                </Box>
+
+                <Box sx={{ position: 'relative' }}>
+                    <Typography sx={{ fontFamily: tokens.fontMono, fontSize: 11, color: tokens.accent, letterSpacing: '0.2em', mb: 3 }}>
+                        // SYSTEM ACCESS
+                    </Typography>
                     <Typography
-                        fontWeight={700}
-                        fontSize={17}
-                        letterSpacing="-0.02em"
-                        color="#fff"
+                        sx={{
+                            fontFamily: tokens.fontDisplay,
+                            fontWeight: 700,
+                            fontSize: { md: 64, lg: 80 },
+                            letterSpacing: '-0.04em',
+                            lineHeight: 0.95,
+                            mb: 3,
+                        }}
                     >
-                        TaskFlow
+                        Operate<br />
+                        at the speed<br />
+                        of <Box component="span" sx={{ color: tokens.accent }}>thought.</Box>
+                    </Typography>
+                    <Typography sx={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', maxWidth: 380, lineHeight: 1.6 }}>
+                        A precision instrument for teams who treat task management as engineering — not paperwork.
                     </Typography>
                 </Box>
-                <Box>
-                    <Typography
-                        variant="h2"
-                        fontWeight={700}
-                        color="#fff"
-                        sx={{ lineHeight: 1.15, mb: 2, maxWidth: 380 }}
-                    >
-                        Manage tasks.<br />
-                        Ship faster.
+
+                <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'space-between' }}>
+                    <Typography sx={{ fontFamily: tokens.fontMono, fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.14em' }}>
+                        © {new Date().getFullYear()} · v2.0
                     </Typography>
-                    <Typography fontSize={15} color="rgba(255,255,255,0.5)" maxWidth={320}>
-                        A modern workspace for teams who care about clarity, speed, and execution.
+                    <Typography sx={{ fontFamily: tokens.fontMono, fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.14em' }}>
+                        BUILD 240513
                     </Typography>
                 </Box>
-                <Typography fontSize={12} color="rgba(255,255,255,0.25)">
-                    © {new Date().getFullYear()} TaskFlow
-                </Typography>
             </Box>
 
-            {/* Right panel */}
+            {/* Right form panel */}
             <Box
                 sx={{
-                    flex: { xs: 1, md: '0 0 420px' },
+                    flex: { xs: 1, md: '0 0 480px' },
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
-                    px: { xs: 3, sm: 6 },
+                    px: { xs: 3, sm: 7 },
                     py: 6,
                     bgcolor: 'background.paper',
+                    backgroundImage: 'none',
                 }}
             >
-                <Box sx={{ maxWidth: 340, width: '100%', mx: 'auto' }}>
-                    <Typography
-                        variant="h5"
-                        fontWeight={700}
-                        letterSpacing="-0.02em"
-                        mb={0.5}
-                    >
-                        Sign in
+                <Box sx={{ maxWidth: 360, width: '100%', mx: 'auto' }}>
+                    <Typography sx={{ fontFamily: tokens.fontMono, fontSize: 11, color: tokens.accent, letterSpacing: '0.18em', mb: 2 }}>
+                        ◆ 01 — SIGN IN
+                    </Typography>
+                    <Typography sx={{ fontFamily: tokens.fontDisplay, fontWeight: 700, fontSize: 36, letterSpacing: '-0.035em', lineHeight: 1, mb: 1 }}>
+                        Welcome back<Box component="span" sx={{ color: tokens.accent }}>.</Box>
                     </Typography>
                     <Typography fontSize={13} color="text.secondary" mb={4}>
-                        Don't have an account?{' '}
-                        <Link
-                            component="button"
-                            onClick={() => nav('/register')}
-                            fontSize={13}
-                            fontWeight={500}
-                            color="primary.main"
-                            underline="hover"
-                        >
-                            Create one
+                        New here?{' '}
+                        <Link component="button" onClick={() => nav('/register')} sx={{ fontFamily: tokens.fontMono, fontSize: 12, color: tokens.accent, textDecoration: 'none', borderBottom: `1px solid ${tokens.accent}`, '&:hover': { opacity: 0.7 } }}>
+                            Create account →
                         </Link>
                     </Typography>
 
                     <form onSubmit={handleSubmit}>
                         <Box mb={2}>
-                            <Typography fontSize={12} fontWeight={500} color="text.secondary" mb={0.75} letterSpacing="0.02em">
-                                EMAIL
+                            <Typography sx={{ fontFamily: tokens.fontMono, fontSize: 10, fontWeight: 500, color: 'text.secondary', letterSpacing: '0.14em', mb: 1 }}>
+                                ◇ EMAIL
                             </Typography>
-                            <TextField
-                                type="email"
-                                fullWidth
-                                required
-                                placeholder="you@example.com"
-                                value={email}
-                                onChange={e => setEmail(e.target.value)}
-                                autoComplete="email"
-                            />
+                            <TextField type="email" fullWidth required placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" />
                         </Box>
 
                         <Box mb={3}>
-                            <Box display="flex" justifyContent="space-between" mb={0.75}>
-                                <Typography fontSize={12} fontWeight={500} color="text.secondary" letterSpacing="0.02em">
-                                    PASSWORD
+                            <Box display="flex" justifyContent="space-between" mb={1}>
+                                <Typography sx={{ fontFamily: tokens.fontMono, fontSize: 10, fontWeight: 500, color: 'text.secondary', letterSpacing: '0.14em' }}>
+                                    ◇ PASSWORD
                                 </Typography>
-                                <Link
-                                    component="button"
-                                    type="button"
-                                    onClick={() => nav('/forgot-password')}
-                                    fontSize={12}
-                                    color="text.secondary"
-                                    underline="hover"
-                                >
-                                    Forgot password?
+                                <Link component="button" type="button" onClick={() => nav('/forgot-password')} sx={{ fontFamily: tokens.fontMono, fontSize: 10, color: 'text.secondary', textDecoration: 'none', letterSpacing: '0.06em', '&:hover': { color: tokens.accent } }}>
+                                    FORGOT?
                                 </Link>
                             </Box>
                             <TextField
                                 type={showPass ? 'text' : 'password'}
-                                fullWidth
-                                required
-                                placeholder="••••••••"
-                                value={password}
-                                onChange={e => setPassword(e.target.value)}
+                                fullWidth required placeholder="••••••••"
+                                value={password} onChange={e => setPassword(e.target.value)}
                                 autoComplete="current-password"
                                 InputProps={{
                                     endAdornment: (
                                         <InputAdornment position="end">
-                                            <IconButton
-                                                size="small"
-                                                onClick={() => setShowPass(v => !v)}
-                                                edge="end"
-                                                tabIndex={-1}
-                                                sx={{ color: 'text.disabled' }}
-                                            >
+                                            <IconButton size="small" onClick={() => setShowPass(v => !v)} edge="end" tabIndex={-1} sx={{ color: 'text.disabled' }}>
                                                 {showPass ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
                                             </IconButton>
                                         </InputAdornment>
@@ -182,9 +182,9 @@ const Login = () => {
                             variant="contained"
                             fullWidth
                             disabled={loading}
-                            sx={{ py: 1.1, fontSize: 14, fontWeight: 600 }}
+                            sx={{ py: 1.25, fontSize: 13, fontWeight: 700, fontFamily: tokens.fontMono, letterSpacing: '0.1em', textTransform: 'uppercase' }}
                         >
-                            {loading ? 'Signing in…' : 'Sign in'}
+                            {loading ? '· Authenticating ·' : 'Sign In →'}
                         </Button>
                     </form>
                 </Box>

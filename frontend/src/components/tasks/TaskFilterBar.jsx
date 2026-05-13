@@ -1,7 +1,7 @@
 import React from 'react';
-import { Box, TextField, MenuItem, Button, Typography } from '@mui/material';
-import TuneRoundedIcon from '@mui/icons-material/TuneRounded';
+import { Box, TextField, MenuItem, Button, Typography, useTheme } from '@mui/material';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import { tokens } from '../../theme/theme';
 
 const STATUSES = [
     { value: 'pending', label: 'Pending' },
@@ -14,37 +14,31 @@ const PRIORITIES = [
     { value: 'high', label: 'High' },
 ];
 
-const selectSx = { minWidth: 130 };
-
 const TaskFilterBar = ({ filters, onChange, users = [] }) => {
+    const theme = useTheme();
+    const dark = theme.palette.mode === 'dark';
     const hasFilters = filters.status || filters.priority || filters.assignedTo;
     const set = key => e => onChange({ ...filters, [key]: e.target.value });
     const clear = () => onChange({ status: '', priority: '', assignedTo: '' });
 
     return (
-        <Box
-            sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1.5,
-                flexWrap: 'wrap',
-                mb: 2,
-            }}
-        >
-            <TuneRoundedIcon sx={{ fontSize: 16, color: 'text.secondary', flexShrink: 0 }} />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', mb: 2.5 }}>
+            <Typography sx={{ fontFamily: tokens.fontMono, fontSize: 10, color: 'text.secondary', letterSpacing: '0.14em', textTransform: 'uppercase', mr: 0.5 }}>
+                ◇ FILTER
+            </Typography>
 
-            <TextField select size="small" label="Status" value={filters.status} onChange={set('status')} sx={selectSx}>
-                <MenuItem value=""><Typography fontSize={13} color="text.secondary">All statuses</Typography></MenuItem>
+            <TextField select size="small" label="Status" value={filters.status} onChange={set('status')} sx={{ minWidth: 130 }}>
+                <MenuItem value=""><Typography fontSize={13} color="text.secondary">All</Typography></MenuItem>
                 {STATUSES.map(s => <MenuItem key={s.value} value={s.value}><Typography fontSize={13}>{s.label}</Typography></MenuItem>)}
             </TextField>
 
-            <TextField select size="small" label="Priority" value={filters.priority} onChange={set('priority')} sx={selectSx}>
-                <MenuItem value=""><Typography fontSize={13} color="text.secondary">All priorities</Typography></MenuItem>
+            <TextField select size="small" label="Priority" value={filters.priority} onChange={set('priority')} sx={{ minWidth: 130 }}>
+                <MenuItem value=""><Typography fontSize={13} color="text.secondary">All</Typography></MenuItem>
                 {PRIORITIES.map(p => <MenuItem key={p.value} value={p.value}><Typography fontSize={13}>{p.label}</Typography></MenuItem>)}
             </TextField>
 
             <TextField select size="small" label="Assignee" value={filters.assignedTo} onChange={set('assignedTo')} sx={{ minWidth: 150 }}>
-                <MenuItem value=""><Typography fontSize={13} color="text.secondary">All members</Typography></MenuItem>
+                <MenuItem value=""><Typography fontSize={13} color="text.secondary">All</Typography></MenuItem>
                 {users.map(u => (
                     <MenuItem key={u._id} value={u._id}>
                         <Typography fontSize={13}>{u.name || u.email}</Typography>
@@ -53,31 +47,23 @@ const TaskFilterBar = ({ filters, onChange, users = [] }) => {
             </TextField>
 
             {hasFilters && (
-                <Button
-                    size="small"
-                    startIcon={<CloseRoundedIcon sx={{ fontSize: 14 }} />}
-                    onClick={clear}
-                    sx={{ color: 'text.secondary', fontSize: 12 }}
-                >
-                    Clear
-                </Button>
-            )}
-
-            {hasFilters && (
-                <Box
-                    sx={{
-                        px: 1,
-                        py: 0.3,
-                        borderRadius: 1,
-                        fontSize: 11,
-                        fontWeight: 600,
-                        letterSpacing: '0.04em',
-                        color: '#6366f1',
-                        bgcolor: 'rgba(99,102,241,0.1)',
-                    }}
-                >
-                    FILTERED
-                </Box>
+                <>
+                    <Button
+                        size="small"
+                        startIcon={<CloseRoundedIcon sx={{ fontSize: 13 }} />}
+                        onClick={clear}
+                        sx={{ fontFamily: tokens.fontMono, color: 'text.secondary', fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase' }}
+                    >
+                        Clear
+                    </Button>
+                    <Box sx={{
+                        px: 0.875, py: 0.2,
+                        fontFamily: tokens.fontMono, fontSize: 10, fontWeight: 700, letterSpacing: '0.1em',
+                        color: tokens.accentInk, bgcolor: tokens.accent,
+                    }}>
+                        ACTIVE
+                    </Box>
+                </>
             )}
         </Box>
     );

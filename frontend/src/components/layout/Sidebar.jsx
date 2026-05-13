@@ -1,8 +1,5 @@
 import React from 'react';
-import {
-    Box, Drawer, List, ListItem, ListItemButton, ListItemIcon,
-    ListItemText, Typography, Divider, Tooltip, useTheme, Avatar,
-} from '@mui/material';
+import { Box, Drawer, Tooltip, useTheme, Avatar, Divider } from '@mui/material';
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
 import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
 import BarChartRoundedIcon from '@mui/icons-material/BarChartRounded';
@@ -11,145 +8,124 @@ import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import ThemeToggle from '../ThemeToggle';
 import NotificationBell from '../notifications/NotificationBell';
 import { useAuth } from '../../hooks/useAuth';
-import logo from '../../assests/images/logo.png';
+import { tokens } from '../../theme/theme';
 
-export const SIDEBAR_WIDTH = 240;
+export const SIDEBAR_WIDTH = 64;
 
 const NAV_ITEMS = [
-    { label: 'Dashboard', icon: <DashboardRoundedIcon fontSize="small" />, view: 'dashboard' },
-    { label: 'Tasks', icon: <AssignmentRoundedIcon fontSize="small" />, view: 'tasks' },
-    { label: 'Analytics', icon: <BarChartRoundedIcon fontSize="small" />, view: 'analytics' },
-    { label: 'Profile', icon: <AccountCircleRoundedIcon fontSize="small" />, view: 'profile' },
+    { label: 'Dashboard', icon: DashboardRoundedIcon, view: 'dashboard', key: '01' },
+    { label: 'Tasks',     icon: AssignmentRoundedIcon, view: 'tasks',     key: '02' },
+    { label: 'Analytics', icon: BarChartRoundedIcon,  view: 'analytics', key: '03' },
+    { label: 'Profile',   icon: AccountCircleRoundedIcon, view: 'profile', key: '04' },
 ];
 
-const SidebarContent = ({ activeView, setActiveView, onLogout, mode, setMode }) => {
+const RailButton = ({ active, onClick, children, label }) => {
+    const theme = useTheme();
+    const dark = theme.palette.mode === 'dark';
+    return (
+        <Tooltip title={label} placement="right">
+            <Box
+                onClick={onClick}
+                role="button"
+                sx={{
+                    position: 'relative',
+                    width: 40,
+                    height: 40,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    color: active ? tokens.accentInk : (dark ? '#71717a' : '#52525b'),
+                    bgcolor: active ? tokens.accent : 'transparent',
+                    transition: 'all 0.12s ease',
+                    '&:hover': {
+                        color: active ? tokens.accentInk : (dark ? '#fafafa' : '#0a0a0d'),
+                        bgcolor: active ? tokens.accent : (dark ? 'rgba(255,255,255,0.05)' : 'rgba(10,10,13,0.05)'),
+                    },
+                }}
+            >
+                {children}
+            </Box>
+        </Tooltip>
+    );
+};
+
+const RailContent = ({ activeView, setActiveView, onLogout, mode, setMode }) => {
     const theme = useTheme();
     const dark = theme.palette.mode === 'dark';
     const { user } = useAuth();
 
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            {/* Brand */}
-            <Box sx={{ px: 2.5, py: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Box
-                    component="img"
-                    src={logo}
-                    alt="TaskFlow"
-                    sx={{ width: 28, height: 28, borderRadius: 1, objectFit: 'contain', flexShrink: 0 }}
-                />
-                <Typography
-                    fontWeight={700}
-                    fontSize={15}
-                    letterSpacing="-0.02em"
-                    color="text.primary"
-                >
-                    TaskFlow
-                </Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', py: 1.5, gap: 1 }}>
+            {/* Brand mark */}
+            <Box
+                sx={{
+                    width: 40,
+                    height: 40,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: `1px solid ${dark ? 'rgba(255,255,255,0.14)' : 'rgba(10,10,13,0.16)'}`,
+                    fontFamily: tokens.fontMono,
+                    fontWeight: 700,
+                    fontSize: 13,
+                    color: tokens.accent,
+                    letterSpacing: '-0.04em',
+                }}
+            >
+                T/
             </Box>
 
-            <Divider />
+            <Box sx={{ height: 1, width: 24, bgcolor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(10,10,13,0.08)', my: 1 }} />
 
             {/* Nav */}
-            <List sx={{ flex: 1, pt: 1.5, px: 1.5, pb: 1 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, flex: 1 }}>
                 {NAV_ITEMS.map(item => {
+                    const Icon = item.icon;
                     const active = activeView === item.view;
                     return (
-                        <ListItem key={item.view} disablePadding sx={{ mb: 0.5 }}>
-                            <ListItemButton
-                                selected={active}
-                                onClick={() => setActiveView(item.view)}
-                                sx={{
-                                    borderRadius: 1.5,
-                                    py: 0.85,
-                                    px: 1.5,
-                                    gap: 0,
-                                    position: 'relative',
-                                    overflow: 'hidden',
-                                    '&.Mui-selected': {
-                                        bgcolor: dark ? 'rgba(99,102,241,0.12)' : 'rgba(99,102,241,0.08)',
-                                    },
-                                    '&.Mui-selected::before': {
-                                        content: '""',
-                                        position: 'absolute',
-                                        left: 0,
-                                        top: '25%',
-                                        bottom: '25%',
-                                        width: 3,
-                                        borderRadius: '0 2px 2px 0',
-                                        background: '#6366f1',
-                                    },
-                                }}
-                            >
-                                <ListItemIcon
-                                    sx={{
-                                        minWidth: 34,
-                                        color: active ? '#6366f1' : 'text.secondary',
-                                    }}
-                                >
-                                    {item.icon}
-                                </ListItemIcon>
-                                <ListItemText
-                                    primary={item.label}
-                                    primaryTypographyProps={{
-                                        fontSize: 13.5,
-                                        fontWeight: active ? 600 : 400,
-                                        color: active ? '#6366f1' : 'text.primary',
-                                    }}
-                                />
-                            </ListItemButton>
-                        </ListItem>
+                        <RailButton
+                            key={item.view}
+                            label={`${item.key} · ${item.label}`}
+                            active={active}
+                            onClick={() => setActiveView(item.view)}
+                        >
+                            <Icon sx={{ fontSize: 18 }} />
+                        </RailButton>
                     );
                 })}
-            </List>
+            </Box>
 
-            <Divider />
-
-            {/* User */}
-            {user && (
-                <Box sx={{ px: 2, py: 1.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                    <Avatar
-                        sx={{
-                            width: 28,
-                            height: 28,
-                            fontSize: 12,
-                            fontWeight: 700,
-                            bgcolor: '#6366f1',
-                            flexShrink: 0,
-                        }}
-                    >
-                        {(user.name || user.email || 'U')[0].toUpperCase()}
-                    </Avatar>
-                    <Box sx={{ overflow: 'hidden', flex: 1, minWidth: 0 }}>
-                        <Typography fontSize={12.5} fontWeight={600} noWrap>
-                            {user.name || 'User'}
-                        </Typography>
-                        <Typography fontSize={11} color="text.secondary" noWrap>
-                            {user.role || 'member'}
-                        </Typography>
-                    </Box>
-                </Box>
-            )}
-
-            {/* Bottom actions */}
-            <Box sx={{ px: 1.5, pb: 2, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <ThemeToggle mode={mode} setMode={setMode} />
+            {/* Bottom controls */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'center' }}>
                 <NotificationBell />
-                <Tooltip title="Logout" placement="top">
-                    <ListItemButton
-                        onClick={onLogout}
-                        sx={{
-                            borderRadius: 1.5,
-                            py: 0.75,
-                            px: 1.5,
-                            flex: 1,
-                            color: 'error.main',
-                            gap: 0.75,
-                        }}
-                    >
-                        <LogoutRoundedIcon sx={{ fontSize: 16 }} />
-                        <Typography fontWeight={500} fontSize={13} color="error.main">Logout</Typography>
-                    </ListItemButton>
-                </Tooltip>
+                <ThemeToggle mode={mode} setMode={setMode} />
+
+                {user && (
+                    <>
+                        <Box sx={{ height: 1, width: 24, bgcolor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(10,10,13,0.08)', my: 0.5 }} />
+                        <Tooltip title={user.name || user.email || 'User'} placement="right">
+                            <Avatar
+                                sx={{
+                                    width: 28,
+                                    height: 28,
+                                    fontSize: 11,
+                                    fontWeight: 600,
+                                    bgcolor: 'transparent',
+                                    color: tokens.accent,
+                                    border: `1px solid ${tokens.accent}`,
+                                    fontFamily: tokens.fontMono,
+                                }}
+                            >
+                                {(user.name || user.email || 'U')[0].toUpperCase()}
+                            </Avatar>
+                        </Tooltip>
+                    </>
+                )}
+
+                <RailButton label="Logout" active={false} onClick={onLogout}>
+                    <LogoutRoundedIcon sx={{ fontSize: 18, color: '#f43f5e' }} />
+                </RailButton>
             </Box>
         </Box>
     );
@@ -161,6 +137,7 @@ const paperSx = (theme) => ({
     background: theme.palette.background.paper,
     borderRight: `1px solid ${theme.palette.divider}`,
     boxShadow: 'none',
+    overflow: 'visible',
 });
 
 const Sidebar = ({ mode, setMode, onLogout, activeView, setActiveView, mobileOpen, setMobileOpen }) => {
@@ -178,7 +155,7 @@ const Sidebar = ({ mode, setMode, onLogout, activeView, setActiveView, mobileOpe
                     '& .MuiDrawer-paper': paperSx(theme),
                 }}
             >
-                <SidebarContent {...props} />
+                <RailContent {...props} />
             </Drawer>
 
             <Drawer
@@ -191,7 +168,7 @@ const Sidebar = ({ mode, setMode, onLogout, activeView, setActiveView, mobileOpe
                     '& .MuiDrawer-paper': paperSx(theme),
                 }}
             >
-                <SidebarContent
+                <RailContent
                     {...props}
                     setActiveView={v => { setActiveView(v); setMobileOpen(false); }}
                 />

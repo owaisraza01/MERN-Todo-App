@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-    Table, TableHead, TableRow, TableCell, TableBody, Chip, Stack,
+    Table, TableHead, TableRow, TableCell, TableBody, Stack,
     Box, Avatar, Tooltip, IconButton, useTheme, TableContainer,
     Checkbox, Button, Typography, Collapse,
 } from '@mui/material';
@@ -11,54 +11,63 @@ import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined';
 import DeleteSweepRoundedIcon from '@mui/icons-material/DeleteSweepRounded';
 import EmptyState from './ui/EmptyState';
 import { TaskTableSkeleton } from './ui/SkeletonLoader';
+import { tokens } from '../theme/theme';
 
 const STATUS_STYLES = {
-    pending:     { color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', label: 'Pending' },
-    'in-progress': { color: '#6366f1', bg: 'rgba(99,102,241,0.1)', label: 'In Progress' },
-    completed:   { color: '#10b981', bg: 'rgba(16,185,129,0.1)', label: 'Completed' },
+    pending:       { color: '#f59e0b', label: 'PEND' },
+    'in-progress': { color: tokens.accent, label: 'ACTIVE' },
+    completed:     { color: '#22c55e', label: 'DONE' },
 };
 const PRIORITY_STYLES = {
-    low:    { color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
-    medium: { color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
-    high:   { color: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
+    low:    { color: '#22c55e', label: 'LOW' },
+    medium: { color: '#f59e0b', label: 'MED' },
+    high:   { color: '#f43f5e', label: 'HIGH' },
 };
 
-const StatusChip = ({ status }) => {
-    const s = STATUS_STYLES[status] || { color: '#64748b', bg: 'transparent', label: status };
+const StatusTag = ({ status }) => {
+    const s = STATUS_STYLES[status] || { color: '#71717a', label: status?.toUpperCase() };
     return (
         <Box
             component="span"
             sx={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                px: 1,
-                py: 0.25,
-                borderRadius: 1,
-                fontSize: 11,
+                gap: 0.625,
+                px: 0.75,
+                py: 0.2,
+                fontFamily: tokens.fontMono,
+                fontSize: 10,
                 fontWeight: 600,
-                letterSpacing: '0.04em',
+                letterSpacing: '0.08em',
                 color: s.color,
-                bgcolor: s.bg,
+                border: `1px solid ${s.color}66`,
+                bgcolor: `${s.color}10`,
             }}
         >
-            {s.label.toUpperCase()}
+            <Box sx={{ width: 5, height: 5, bgcolor: s.color }} />
+            {s.label}
         </Box>
     );
 };
 
-const PriorityDot = ({ priority }) => {
-    const p = PRIORITY_STYLES[priority] || { color: '#64748b' };
+const PriorityTag = ({ priority }) => {
+    const p = PRIORITY_STYLES[priority] || { color: '#71717a', label: priority?.toUpperCase() };
     return (
-        <Box display="flex" alignItems="center" gap={0.75}>
-            <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: p.color, flexShrink: 0 }} />
-            <Typography fontSize={12} fontWeight={500} sx={{ textTransform: 'capitalize', color: p.color }}>
-                {priority}
-            </Typography>
-        </Box>
+        <Typography
+            sx={{
+                fontFamily: tokens.fontMono,
+                fontSize: 10.5,
+                fontWeight: 600,
+                letterSpacing: '0.08em',
+                color: p.color,
+            }}
+        >
+            {p.label}
+        </Typography>
     );
 };
 
-const COLS = ['Title', 'Status', 'Priority', 'Due', 'Assignees', 'Actions'];
+const COLS = ['Title', 'Status', 'Pri', 'Due', 'Owners', ''];
 
 const TaskTable = ({ tasks = [], loading = false, selected = [], onSelectChange, onEdit, onDelete, onArchive, onView, onBulkDelete }) => {
     const theme = useTheme();
@@ -68,7 +77,7 @@ const TaskTable = ({ tasks = [], loading = false, selected = [], onSelectChange,
     const someSelected = selected.length > 0 && selected.length < tasks.length;
 
     if (loading) return <TaskTableSkeleton />;
-    if (!loading && tasks.length === 0) return <EmptyState title="No tasks found" subtitle="Try adjusting your filters or create a new task" />;
+    if (!loading && tasks.length === 0) return <EmptyState title="No tasks found" subtitle="Adjust filters or create a new task" />;
 
     return (
         <Box>
@@ -81,28 +90,25 @@ const TaskTable = ({ tasks = [], loading = false, selected = [], onSelectChange,
                         px: 2,
                         py: 1,
                         mb: 1.5,
-                        borderRadius: 1.5,
-                        border: '1px solid rgba(99,102,241,0.3)',
-                        bgcolor: dark ? 'rgba(99,102,241,0.1)' : 'rgba(99,102,241,0.06)',
+                        border: `1px solid ${tokens.accent}`,
+                        bgcolor: dark ? 'rgba(212,255,58,0.06)' : 'rgba(184,230,44,0.1)',
                     }}
                 >
-                    <Typography fontSize={13} fontWeight={600} color="primary.main">
-                        {selected.length} selected
+                    <Typography sx={{ fontFamily: tokens.fontMono, fontSize: 11, fontWeight: 600, color: tokens.accent, letterSpacing: '0.1em' }}>
+                        {String(selected.length).padStart(2, '0')} SELECTED
                     </Typography>
                     <Button
                         size="small"
-                        startIcon={<DeleteSweepRoundedIcon fontSize="small" />}
+                        startIcon={<DeleteSweepRoundedIcon sx={{ fontSize: 14 }} />}
                         onClick={onBulkDelete}
-                        color="error"
-                        variant="outlined"
-                        sx={{ fontSize: 12, py: 0.4 }}
+                        sx={{ fontSize: 11, fontFamily: tokens.fontMono, color: '#f43f5e', letterSpacing: '0.06em', textTransform: 'uppercase', minWidth: 0, ml: 'auto' }}
                     >
                         Delete
                     </Button>
                     <Button
                         size="small"
                         onClick={() => onSelectChange([])}
-                        sx={{ fontSize: 12, py: 0.4, ml: 'auto', color: 'text.secondary' }}
+                        sx={{ fontSize: 11, fontFamily: tokens.fontMono, color: 'text.secondary', letterSpacing: '0.06em', textTransform: 'uppercase', minWidth: 0 }}
                     >
                         Clear
                     </Button>
@@ -111,10 +117,9 @@ const TaskTable = ({ tasks = [], loading = false, selected = [], onSelectChange,
 
             <TableContainer
                 sx={{
-                    borderRadius: 1.5,
-                    border: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.08)'}`,
+                    border: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(10,10,13,0.08)'}`,
                     bgcolor: theme.palette.background.paper,
-                    overflow: 'hidden',
+                    overflow: 'auto',
                 }}
             >
                 <Table>
@@ -128,108 +133,91 @@ const TaskTable = ({ tasks = [], loading = false, selected = [], onSelectChange,
                                     size="small"
                                 />
                             </TableCell>
+                            <TableCell sx={{ width: 32 }}>#</TableCell>
                             {COLS.map(col => (
-                                <TableCell key={col} align={col === 'Actions' ? 'right' : 'left'}>
+                                <TableCell key={col} align={col === '' ? 'right' : 'left'}>
                                     {col}
                                 </TableCell>
                             ))}
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {tasks.map(task => (
-                            <TableRow
-                                key={task._id}
-                                hover
-                                selected={selected.includes(task._id)}
-                            >
-                                <TableCell padding="checkbox" sx={{ pl: 2 }}>
-                                    <Checkbox
-                                        checked={selected.includes(task._id)}
-                                        onChange={() => onSelectChange(
-                                            selected.includes(task._id)
-                                                ? selected.filter(s => s !== task._id)
-                                                : [...selected, task._id]
+                        {tasks.map((task, idx) => {
+                            const overdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
+                            return (
+                                <TableRow key={task._id} hover selected={selected.includes(task._id)}>
+                                    <TableCell padding="checkbox" sx={{ pl: 2 }}>
+                                        <Checkbox
+                                            checked={selected.includes(task._id)}
+                                            onChange={() => onSelectChange(
+                                                selected.includes(task._id)
+                                                    ? selected.filter(s => s !== task._id)
+                                                    : [...selected, task._id]
+                                            )}
+                                            size="small"
+                                        />
+                                    </TableCell>
+                                    <TableCell sx={{ fontFamily: tokens.fontMono, fontSize: 11, color: 'text.disabled', letterSpacing: '0.05em' }}>
+                                        {String(idx + 1).padStart(2, '0')}
+                                    </TableCell>
+                                    <TableCell onClick={() => onView(task)} sx={{ cursor: 'pointer', maxWidth: 280 }}>
+                                        <Typography
+                                            fontSize={13}
+                                            fontWeight={500}
+                                            noWrap
+                                            sx={{ '&:hover': { color: tokens.accent }, transition: 'color 0.12s' }}
+                                        >
+                                            {task.title}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell><StatusTag status={task.status} /></TableCell>
+                                    <TableCell><PriorityTag priority={task.priority} /></TableCell>
+                                    <TableCell>
+                                        <Typography
+                                            sx={{
+                                                fontFamily: tokens.fontMono,
+                                                fontSize: 11.5,
+                                                fontWeight: overdue ? 600 : 400,
+                                                color: overdue ? '#f43f5e' : 'text.secondary',
+                                                letterSpacing: '0.04em',
+                                            }}
+                                        >
+                                            {task.dueDate
+                                                ? new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit' }).toUpperCase()
+                                                : '—'}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        {(task.assignedTo || []).length === 0 ? (
+                                            <Typography sx={{ fontFamily: tokens.fontMono, fontSize: 11, color: 'text.disabled' }}>—</Typography>
+                                        ) : (
+                                            <Stack direction="row" spacing={-0.5}>
+                                                {(task.assignedTo || []).slice(0, 3).map(u => (
+                                                    <Tooltip key={u._id} title={u.name || u.email}>
+                                                        <Avatar sx={{
+                                                            width: 22, height: 22, fontSize: 9, fontWeight: 600,
+                                                            bgcolor: 'transparent', color: tokens.accent,
+                                                            border: `1px solid ${tokens.accent}80`,
+                                                            fontFamily: tokens.fontMono,
+                                                        }}>
+                                                            {(u.name || u.email || 'U')[0].toUpperCase()}
+                                                        </Avatar>
+                                                    </Tooltip>
+                                                ))}
+                                            </Stack>
                                         )}
-                                        size="small"
-                                    />
-                                </TableCell>
-                                <TableCell
-                                    onClick={() => onView(task)}
-                                    sx={{ cursor: 'pointer', maxWidth: 220 }}
-                                >
-                                    <Typography
-                                        fontSize={13}
-                                        fontWeight={500}
-                                        noWrap
-                                        sx={{ '&:hover': { color: 'primary.main' }, transition: 'color 0.15s' }}
-                                    >
-                                        {task.title}
-                                    </Typography>
-                                </TableCell>
-                                <TableCell><StatusChip status={task.status} /></TableCell>
-                                <TableCell><PriorityDot priority={task.priority} /></TableCell>
-                                <TableCell>
-                                    <Typography
-                                        fontSize={12}
-                                        color={
-                                            task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed'
-                                                ? 'error.main'
-                                                : 'text.secondary'
-                                        }
-                                        sx={{ fontVariantNumeric: 'tabular-nums' }}
-                                    >
-                                        {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '—'}
-                                    </Typography>
-                                </TableCell>
-                                <TableCell>
-                                    {(task.assignedTo || []).length === 0 ? (
-                                        <Typography fontSize={12} color="text.disabled">—</Typography>
-                                    ) : (
-                                        <Stack direction="row" spacing={0.5}>
-                                            {(task.assignedTo || []).slice(0, 3).map(u => (
-                                                <Tooltip key={u._id} title={u.name || u.email}>
-                                                    <Avatar
-                                                        sx={{
-                                                            width: 22,
-                                                            height: 22,
-                                                            fontSize: 10,
-                                                            fontWeight: 700,
-                                                            bgcolor: '#6366f1',
-                                                        }}
-                                                    >
-                                                        {(u.name || u.email || 'U')[0]}
-                                                    </Avatar>
-                                                </Tooltip>
-                                            ))}
+                                    </TableCell>
+                                    <TableCell align="right">
+                                        <Stack direction="row" spacing={0.25} justifyContent="flex-end">
+                                            <Tooltip title="View"><IconButton size="small" onClick={() => onView(task)} sx={{ color: 'text.secondary' }}><VisibilityOutlinedIcon sx={{ fontSize: 15 }} /></IconButton></Tooltip>
+                                            <Tooltip title="Edit"><IconButton size="small" onClick={() => onEdit(task)} sx={{ color: 'text.secondary' }}><EditRoundedIcon sx={{ fontSize: 15 }} /></IconButton></Tooltip>
+                                            <Tooltip title="Archive"><IconButton size="small" onClick={() => onArchive(task._id)} sx={{ color: 'text.secondary' }}><ArchiveOutlinedIcon sx={{ fontSize: 15 }} /></IconButton></Tooltip>
+                                            <Tooltip title="Delete"><IconButton size="small" onClick={() => onDelete(task._id)} sx={{ color: '#f43f5e' }}><DeleteOutlineRoundedIcon sx={{ fontSize: 15 }} /></IconButton></Tooltip>
                                         </Stack>
-                                    )}
-                                </TableCell>
-                                <TableCell align="right">
-                                    <Stack direction="row" spacing={0.25} justifyContent="flex-end">
-                                        <Tooltip title="View">
-                                            <IconButton size="small" onClick={() => onView(task)} sx={{ color: 'text.secondary' }}>
-                                                <VisibilityOutlinedIcon sx={{ fontSize: 16 }} />
-                                            </IconButton>
-                                        </Tooltip>
-                                        <Tooltip title="Edit">
-                                            <IconButton size="small" onClick={() => onEdit(task)} sx={{ color: 'text.secondary' }}>
-                                                <EditRoundedIcon sx={{ fontSize: 16 }} />
-                                            </IconButton>
-                                        </Tooltip>
-                                        <Tooltip title="Archive">
-                                            <IconButton size="small" onClick={() => onArchive(task._id)} sx={{ color: 'text.secondary' }}>
-                                                <ArchiveOutlinedIcon sx={{ fontSize: 16 }} />
-                                            </IconButton>
-                                        </Tooltip>
-                                        <Tooltip title="Delete">
-                                            <IconButton size="small" onClick={() => onDelete(task._id)} sx={{ color: 'error.main' }}>
-                                                <DeleteOutlineRoundedIcon sx={{ fontSize: 16 }} />
-                                            </IconButton>
-                                        </Tooltip>
-                                    </Stack>
-                                </TableCell>
-                            </TableRow>
-                        ))}
+                                    </TableCell>
+                                </TableRow>
+                            );
+                        })}
                     </TableBody>
                 </Table>
             </TableContainer>

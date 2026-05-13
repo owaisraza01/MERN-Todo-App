@@ -35,7 +35,7 @@ const Home = ({ mode, setMode }) => {
                 }}
             >
                 <Topbar onMenuClick={() => setMobileOpen(true)} />
-                <Box sx={{ flex: 1, p: { xs: 2, md: 3 }, overflow: 'auto' }}>
+                <Box sx={{ flex: 1, overflow: 'auto' }}>
                     {activeView === 'dashboard' && <Dashboard />}
                     {activeView === 'tasks' && <Tasks />}
                     {activeView === 'analytics' && <Analytics />}

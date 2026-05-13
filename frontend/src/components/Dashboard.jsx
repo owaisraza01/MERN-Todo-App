@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-    Card, CardContent, Typography, Grid, Box, useTheme, Divider,
-} from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 import {
     PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
     BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -9,11 +7,46 @@ import {
 import axios from 'axios';
 import { useAuth } from '../hooks/useAuth';
 import { DashboardSkeleton } from './ui/SkeletonLoader';
+import PageHeader from './layout/PageHeader';
+import { tokens } from '../theme/theme';
+
+const Tile = ({ children, sx = {}, span = {} }) => {
+    const theme = useTheme();
+    const dark = theme.palette.mode === 'dark';
+    return (
+        <Box
+            sx={{
+                border: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(10,10,13,0.08)'}`,
+                bgcolor: 'background.paper',
+                p: { xs: 2.5, md: 3 },
+                position: 'relative',
+                overflow: 'hidden',
+                gridColumn: span.col,
+                gridRow: span.row,
+                ...sx,
+            }}
+        >
+            {children}
+        </Box>
+    );
+};
+
+const TileLabel = ({ tag, label }) => (
+    <Box display="flex" alignItems="center" gap={1} mb={2}>
+        <Box sx={{ fontFamily: tokens.fontMono, fontSize: 10, color: tokens.accent, letterSpacing: '0.1em', fontWeight: 600 }}>
+            {tag}
+        </Box>
+        <Box sx={{ height: 1, width: 16, bgcolor: 'divider' }} />
+        <Typography sx={{ fontFamily: tokens.fontMono, fontSize: 10, fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'text.secondary' }}>
+            {label}
+        </Typography>
+    </Box>
+);
 
 const Dashboard = () => {
     const theme = useTheme();
-    const { authHeader } = useAuth();
     const dark = theme.palette.mode === 'dark';
+    const { authHeader } = useAuth();
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({ total: 0, pending: 0, inprogress: 0, completed: 0, low: 0, medium: 0, high: 0 });
     const [dueSoon, setDueSoon] = useState([]);
@@ -24,18 +57,19 @@ const Dashboard = () => {
             setLoading(true);
             try {
                 const { data } = await axios.get('/api/tasks', { headers: authHeader });
+                const tasks = Array.isArray(data) ? data : data.tasks || [];
                 const now = new Date();
-                const soon = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+                const soon = new Date(now.getTime() + 3 * 86400000);
                 setStats({
-                    total: data.length,
-                    pending: data.filter(t => t.status === 'pending').length,
-                    inprogress: data.filter(t => t.status === 'in-progress').length,
-                    completed: data.filter(t => t.status === 'completed').length,
-                    low: data.filter(t => t.priority === 'low').length,
-                    medium: data.filter(t => t.priority === 'medium').length,
-                    high: data.filter(t => t.priority === 'high').length,
+                    total: tasks.length,
+                    pending: tasks.filter(t => t.status === 'pending').length,
+                    inprogress: tasks.filter(t => t.status === 'in-progress').length,
+                    completed: tasks.filter(t => t.status === 'completed').length,
+                    low: tasks.filter(t => t.priority === 'low').length,
+                    medium: tasks.filter(t => t.priority === 'medium').length,
+                    high: tasks.filter(t => t.priority === 'high').length,
                 });
-                const active = data.filter(t => t.status !== 'completed' && t.dueDate);
+                const active = tasks.filter(t => t.status !== 'completed' && t.dueDate);
                 setDueSoon(active.filter(t => { const d = new Date(t.dueDate); return d >= now && d <= soon; }));
                 setOverdue(active.filter(t => new Date(t.dueDate) < now));
             } finally {
@@ -45,196 +79,213 @@ const Dashboard = () => {
         fetch();
     }, []);
 
-    if (loading) return <DashboardSkeleton />;
-
     const muted = theme.palette.text.secondary;
-    const border = dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.08)';
-    const cardBg = theme.palette.background.paper;
-
-    const STAT_CARDS = [
-        { label: 'Total', value: stats.total, accent: '#6366f1' },
-        { label: 'Pending', value: stats.pending, accent: '#f59e0b' },
-        { label: 'In Progress', value: stats.inprogress, accent: '#06b6d4' },
-        { label: 'Completed', value: stats.completed, accent: '#10b981' },
-    ];
+    const completionPct = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
 
     const pieData = [
-        { name: 'Pending', value: stats.pending },
-        { name: 'In Progress', value: stats.inprogress },
-        { name: 'Completed', value: stats.completed },
+        { name: 'Pending',     value: stats.pending,    fill: '#f59e0b' },
+        { name: 'In Progress', value: stats.inprogress, fill: tokens.accent },
+        { name: 'Completed',   value: stats.completed,  fill: '#22c55e' },
     ];
-    const PIE_COLORS = ['#f59e0b', '#6366f1', '#10b981'];
 
     const barData = [
-        { name: 'Low', count: stats.low, fill: '#10b981' },
-        { name: 'Medium', count: stats.medium, fill: '#f59e0b' },
-        { name: 'High', count: stats.high, fill: '#ef4444' },
+        { name: 'LOW',  count: stats.low,    fill: '#22c55e' },
+        { name: 'MED',  count: stats.medium, fill: '#f59e0b' },
+        { name: 'HIGH', count: stats.high,   fill: '#f43f5e' },
     ];
 
     const tooltipStyle = {
-        background: cardBg,
-        border: `1px solid ${border}`,
-        borderRadius: 6,
-        fontSize: 13,
+        background: dark ? '#111114' : '#ffffff',
+        border: `1px solid ${dark ? 'rgba(255,255,255,0.1)' : 'rgba(10,10,13,0.1)'}`,
+        borderRadius: 2,
+        fontSize: 11,
+        fontFamily: tokens.fontMono,
         boxShadow: 'none',
     };
 
     return (
-        <Grid container spacing={2.5}>
-            {/* Stat cards */}
-            {STAT_CARDS.map(s => (
-                <Grid item xs={6} sm={3} key={s.label}>
-                    <Card sx={{ bgcolor: cardBg }}>
-                        <CardContent sx={{ p: '16px !important' }}>
-                            <Box
-                                sx={{
-                                    width: 28,
-                                    height: 3,
-                                    borderRadius: 1,
-                                    bgcolor: s.accent,
-                                    mb: 2,
-                                }}
-                            />
-                            <Typography
-                                sx={{
-                                    fontSize: 32,
-                                    fontWeight: 700,
-                                    letterSpacing: '-0.03em',
-                                    lineHeight: 1,
-                                    fontVariantNumeric: 'tabular-nums',
-                                    color: s.accent,
-                                }}
-                            >
-                                {s.value}
-                            </Typography>
-                            <Typography fontSize={12} color="text.secondary" fontWeight={500} mt={0.75} letterSpacing="0.04em">
-                                {s.label.toUpperCase()}
-                            </Typography>
-                        </CardContent>
-                    </Card>
-                </Grid>
-            ))}
+        <>
+            <PageHeader
+                index="01"
+                title="Dashboard"
+                subtitle="Live operational overview of your task pipeline, team performance, and upcoming deadlines."
+            />
 
-            {/* Status pie */}
-            <Grid item xs={12} md={6}>
-                <Card sx={{ bgcolor: cardBg }}>
-                    <CardContent>
-                        <Typography fontSize={12} fontWeight={600} color="text.secondary" letterSpacing="0.06em" mb={2}>
-                            STATUS DISTRIBUTION
-                        </Typography>
-                        <ResponsiveContainer width="100%" height={200}>
-                            <PieChart>
-                                <Pie
-                                    data={pieData}
-                                    dataKey="value"
-                                    nameKey="name"
-                                    cx="50%" cy="50%"
-                                    outerRadius={72}
-                                    innerRadius={40}
-                                    paddingAngle={3}
-                                    label={({ name, percent }) => percent > 0 ? `${name} ${Math.round(percent * 100)}%` : ''}
-                                    labelLine={false}
+            <Box sx={{ px: { xs: 3, md: 5 }, py: { xs: 3, md: 4 } }}>
+                {loading ? <DashboardSkeleton /> : (
+                    <Box
+                        sx={{
+                            display: 'grid',
+                            gap: 2,
+                            gridTemplateColumns: { xs: '1fr', sm: 'repeat(4, 1fr)', lg: 'repeat(6, 1fr)' },
+                            gridAutoRows: { xs: 'auto', sm: 'minmax(140px, auto)' },
+                        }}
+                    >
+                        {/* HERO: massive total */}
+                        <Tile span={{ col: { sm: 'span 4', lg: 'span 4' }, row: { sm: 'span 2' } }}>
+                            <TileLabel tag="◆" label="Total Tasks Tracked" />
+                            <Box display="flex" alignItems="flex-end" gap={3} flexWrap="wrap">
+                                <Typography
+                                    sx={{
+                                        fontFamily: tokens.fontDisplay,
+                                        fontWeight: 700,
+                                        fontSize: { xs: 96, md: 140 },
+                                        letterSpacing: '-0.06em',
+                                        lineHeight: 0.85,
+                                        color: 'text.primary',
+                                        fontVariantNumeric: 'tabular-nums',
+                                    }}
                                 >
-                                    {pieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i]} />)}
-                                </Pie>
-                                <Tooltip contentStyle={tooltipStyle} />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </CardContent>
-                </Card>
-            </Grid>
-
-            {/* Priority bar */}
-            <Grid item xs={12} md={6}>
-                <Card sx={{ bgcolor: cardBg }}>
-                    <CardContent>
-                        <Typography fontSize={12} fontWeight={600} color="text.secondary" letterSpacing="0.06em" mb={2}>
-                            PRIORITY BREAKDOWN
-                        </Typography>
-                        <ResponsiveContainer width="100%" height={200}>
-                            <BarChart data={barData} barSize={32}>
-                                <CartesianGrid strokeDasharray="3 3" stroke={border} vertical={false} />
-                                <XAxis dataKey="name" tick={{ fontSize: 12, fill: muted }} axisLine={false} tickLine={false} />
-                                <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: muted }} axisLine={false} tickLine={false} />
-                                <Tooltip contentStyle={tooltipStyle} cursor={{ fill: dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)' }} />
-                                <Bar dataKey="count" radius={[3, 3, 0, 0]}>
-                                    {barData.map((e, i) => <Cell key={i} fill={e.fill} />)}
-                                </Bar>
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </CardContent>
-                </Card>
-            </Grid>
-
-            {/* Due soon */}
-            <Grid item xs={12} md={8}>
-                <Card sx={{ bgcolor: cardBg }}>
-                    <CardContent>
-                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                            <Typography fontSize={12} fontWeight={600} color="text.secondary" letterSpacing="0.06em">
-                                DUE SOON
-                            </Typography>
-                            <Typography fontSize={12} color="text.secondary">
-                                Next 3 days · <Box component="span" fontWeight={700} color="#f59e0b">{dueSoon.length}</Box>
-                            </Typography>
-                        </Box>
-                        {dueSoon.length === 0 ? (
-                            <Typography fontSize={13} color="text.disabled" textAlign="center" py={3}>
-                                No tasks due in the next 3 days
-                            </Typography>
-                        ) : (
-                            dueSoon.map((task, i) => (
-                                <Box key={task._id}>
-                                    {i > 0 && <Divider sx={{ my: 1 }} />}
-                                    <Box display="flex" justifyContent="space-between" alignItems="center" py={0.5}>
-                                        <Typography fontSize={13} fontWeight={500} noWrap sx={{ maxWidth: '60%' }}>
-                                            {task.title}
-                                        </Typography>
-                                        <Typography fontSize={12} color="warning.main" fontWeight={600}
-                                            sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                                            {new Date(task.dueDate).toLocaleDateString()}
+                                    {String(stats.total).padStart(2, '0')}
+                                </Typography>
+                                <Box pb={1.5}>
+                                    <Box display="flex" alignItems="center" gap={0.75} mb={1}>
+                                        <Box sx={{ width: 8, height: 8, bgcolor: tokens.accent }} />
+                                        <Typography sx={{ fontFamily: tokens.fontMono, fontSize: 11, fontWeight: 600, color: tokens.accent, letterSpacing: '0.08em' }}>
+                                            {completionPct}% COMPLETE
                                         </Typography>
                                     </Box>
+                                    <Typography sx={{ fontSize: 12, color: 'text.secondary', fontFamily: tokens.fontMono, letterSpacing: '0.04em' }}>
+                                        {stats.completed} of {stats.total} done
+                                    </Typography>
                                 </Box>
-                            ))
-                        )}
-                    </CardContent>
-                </Card>
-            </Grid>
+                            </Box>
 
-            {/* Overdue */}
-            <Grid item xs={12} md={4}>
-                <Card sx={{
-                    bgcolor: overdue.length > 0
-                        ? (dark ? 'rgba(239,68,68,0.06)' : 'rgba(239,68,68,0.03)')
-                        : cardBg,
-                    borderColor: overdue.length > 0 ? 'rgba(239,68,68,0.25)' : border,
-                }}>
-                    <CardContent sx={{ textAlign: 'center', py: 4 }}>
-                        <Typography
+                            {/* Progress bar */}
+                            <Box sx={{ mt: 3, height: 2, bgcolor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(10,10,13,0.06)', position: 'relative' }}>
+                                <Box sx={{ position: 'absolute', inset: 0, width: `${completionPct}%`, bgcolor: tokens.accent }} />
+                            </Box>
+
+                            {/* Mini breakdown row */}
+                            <Box mt={3} display="grid" gridTemplateColumns="repeat(3, 1fr)" gap={2}>
+                                {[
+                                    { label: 'PENDING',   value: stats.pending,    color: '#f59e0b' },
+                                    { label: 'ACTIVE',    value: stats.inprogress, color: tokens.accent },
+                                    { label: 'DONE',      value: stats.completed,  color: '#22c55e' },
+                                ].map(item => (
+                                    <Box key={item.label}>
+                                        <Typography sx={{ fontFamily: tokens.fontDisplay, fontSize: 24, fontWeight: 700, color: item.color, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>
+                                            {item.value}
+                                        </Typography>
+                                        <Typography sx={{ fontFamily: tokens.fontMono, fontSize: 9.5, color: 'text.secondary', letterSpacing: '0.12em', fontWeight: 500 }}>
+                                            {item.label}
+                                        </Typography>
+                                    </Box>
+                                ))}
+                            </Box>
+                        </Tile>
+
+                        {/* OVERDUE alert tile */}
+                        <Tile
+                            span={{ col: { sm: 'span 2', lg: 'span 2' }, row: { sm: 'span 1' } }}
                             sx={{
-                                fontSize: 52,
-                                fontWeight: 700,
-                                letterSpacing: '-0.05em',
-                                lineHeight: 1,
-                                fontVariantNumeric: 'tabular-nums',
-                                color: overdue.length > 0 ? 'error.main' : 'text.disabled',
+                                bgcolor: overdue.length > 0 ? (dark ? 'rgba(244,63,94,0.08)' : 'rgba(244,63,94,0.05)') : 'background.paper',
+                                borderColor: overdue.length > 0 ? 'rgba(244,63,94,0.3)' : undefined,
                             }}
                         >
-                            {overdue.length}
-                        </Typography>
-                        <Typography fontSize={12} fontWeight={600} color="text.secondary" letterSpacing="0.06em" mt={1}>
-                            OVERDUE
-                        </Typography>
-                        {overdue.length > 0 && (
-                            <Typography fontSize={12} color="error.main" mt={1}>
-                                Needs immediate attention
+                            <TileLabel tag="!" label="Overdue" />
+                            <Typography sx={{ fontFamily: tokens.fontDisplay, fontWeight: 700, fontSize: 56, letterSpacing: '-0.04em', lineHeight: 0.9, color: overdue.length > 0 ? '#f43f5e' : 'text.disabled', fontVariantNumeric: 'tabular-nums' }}>
+                                {String(overdue.length).padStart(2, '0')}
                             </Typography>
-                        )}
-                    </CardContent>
-                </Card>
-            </Grid>
-        </Grid>
+                            <Typography sx={{ mt: 1, fontFamily: tokens.fontMono, fontSize: 10.5, color: overdue.length > 0 ? '#f43f5e' : 'text.disabled', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                                {overdue.length > 0 ? 'Action required →' : '— All on schedule —'}
+                            </Typography>
+                        </Tile>
+
+                        {/* Priority bar chart */}
+                        <Tile span={{ col: { sm: 'span 2', lg: 'span 2' }, row: { sm: 'span 1' } }}>
+                            <TileLabel tag="◐" label="Priority" />
+                            <Box sx={{ height: 90, mt: 1 }}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={barData} barSize={24}>
+                                        <XAxis dataKey="name" tick={{ fontSize: 10, fill: muted, fontFamily: tokens.fontMono, letterSpacing: 1 }} axisLine={false} tickLine={false} />
+                                        <YAxis hide />
+                                        <Tooltip contentStyle={tooltipStyle} cursor={{ fill: dark ? 'rgba(255,255,255,0.03)' : 'rgba(10,10,13,0.03)' }} />
+                                        <Bar dataKey="count" radius={[0, 0, 0, 0]}>
+                                            {barData.map((e, i) => <Cell key={i} fill={e.fill} />)}
+                                        </Bar>
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </Box>
+                        </Tile>
+
+                        {/* Status pie */}
+                        <Tile span={{ col: { sm: 'span 2', lg: 'span 3' }, row: { sm: 'span 2' } }}>
+                            <TileLabel tag="◯" label="Status Distribution" />
+                            <Box sx={{ height: 200 }}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={pieData}
+                                            dataKey="value"
+                                            nameKey="name"
+                                            cx="50%" cy="50%"
+                                            outerRadius={78}
+                                            innerRadius={50}
+                                            paddingAngle={2}
+                                            stroke="none"
+                                        >
+                                            {pieData.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
+                                        </Pie>
+                                        <Tooltip contentStyle={tooltipStyle} />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </Box>
+                            <Box mt={1} display="flex" gap={2} flexWrap="wrap">
+                                {pieData.map(d => (
+                                    <Box key={d.name} display="flex" alignItems="center" gap={0.75}>
+                                        <Box sx={{ width: 8, height: 8, bgcolor: d.fill }} />
+                                        <Typography sx={{ fontFamily: tokens.fontMono, fontSize: 10, color: 'text.secondary', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                                            {d.name} <Box component="span" sx={{ color: 'text.primary', fontWeight: 600 }}>{d.value}</Box>
+                                        </Typography>
+                                    </Box>
+                                ))}
+                            </Box>
+                        </Tile>
+
+                        {/* Due soon */}
+                        <Tile span={{ col: { sm: 'span 4', lg: 'span 3' }, row: { sm: 'span 2' } }}>
+                            <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                                <TileLabel tag="→" label="Due Within 72H" />
+                                <Typography sx={{ fontFamily: tokens.fontMono, fontSize: 11, color: '#f59e0b', fontWeight: 700 }}>
+                                    {String(dueSoon.length).padStart(2, '0')}
+                                </Typography>
+                            </Box>
+
+                            {dueSoon.length === 0 ? (
+                                <Box py={4} textAlign="center">
+                                    <Typography sx={{ fontFamily: tokens.fontMono, fontSize: 11, color: 'text.disabled', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                                        — Clear horizon —
+                                    </Typography>
+                                </Box>
+                            ) : (
+                                <Box sx={{ maxHeight: 240, overflowY: 'auto' }}>
+                                    {dueSoon.map((task, i) => (
+                                        <Box
+                                            key={task._id}
+                                            sx={{
+                                                display: 'flex', alignItems: 'center', gap: 1.5,
+                                                py: 1.25, borderTop: i > 0 ? `1px solid ${dark ? 'rgba(255,255,255,0.05)' : 'rgba(10,10,13,0.05)'}` : 'none',
+                                            }}
+                                        >
+                                            <Typography sx={{ fontFamily: tokens.fontMono, fontSize: 10, color: 'text.disabled', minWidth: 24, letterSpacing: '0.05em' }}>
+                                                {String(i + 1).padStart(2, '0')}
+                                            </Typography>
+                                            <Typography fontSize={13} fontWeight={500} noWrap sx={{ flex: 1 }}>
+                                                {task.title}
+                                            </Typography>
+                                            <Typography sx={{ fontFamily: tokens.fontMono, fontSize: 11, color: '#f59e0b', fontWeight: 600, letterSpacing: '0.04em' }}>
+                                                {new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit' }).toUpperCase()}
+                                            </Typography>
+                                        </Box>
+                                    ))}
+                                </Box>
+                            )}
+                        </Tile>
+                    </Box>
+                )}
+            </Box>
+        </>
     );
 };
 

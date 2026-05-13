@@ -2,31 +2,40 @@ import React from 'react';
 import { Box, Skeleton, Grid } from '@mui/material';
 
 export const DashboardSkeleton = () => (
-    <Grid container spacing={2.5}>
-        {[...Array(4)].map((_, i) => (
-            <Grid item xs={6} sm={3} key={i}>
-                <Box sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1.5, bgcolor: 'background.paper' }}>
-                    <Skeleton variant="rectangular" width={28} height={3} sx={{ mb: 2, borderRadius: 1 }} />
-                    <Skeleton variant="text" width="45%" height={40} />
-                    <Skeleton variant="text" width="55%" height={16} />
-                </Box>
+    <Box
+        sx={{
+            display: 'grid',
+            gap: 2,
+            gridTemplateColumns: { xs: '1fr', sm: 'repeat(4, 1fr)', lg: 'repeat(6, 1fr)' },
+            gridAutoRows: 'minmax(140px, auto)',
+        }}
+    >
+        <Box sx={{ gridColumn: { sm: 'span 4', lg: 'span 4' }, gridRow: 'span 2', p: 3, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
+            <Skeleton variant="rectangular" width={80} height={10} sx={{ mb: 3 }} />
+            <Skeleton variant="text" width="40%" height={120} sx={{ mb: 2 }} />
+            <Skeleton variant="rectangular" height={2} sx={{ mb: 3 }} />
+            <Grid container spacing={2}>
+                {[0, 1, 2].map(i => (
+                    <Grid item xs={4} key={i}>
+                        <Skeleton variant="text" width="50%" height={32} />
+                        <Skeleton variant="text" width="60%" height={12} />
+                    </Grid>
+                ))}
             </Grid>
+        </Box>
+        {[1, 2, 3, 4].map(i => (
+            <Box key={i} sx={{ gridColumn: { sm: 'span 2' }, p: 3, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
+                <Skeleton variant="rectangular" width={80} height={10} sx={{ mb: 2 }} />
+                <Skeleton variant="text" width="55%" height={56} />
+            </Box>
         ))}
-        {[...Array(2)].map((_, i) => (
-            <Grid item xs={12} md={6} key={`c${i}`}>
-                <Box sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1.5, bgcolor: 'background.paper' }}>
-                    <Skeleton variant="text" width="40%" height={18} sx={{ mb: 2 }} />
-                    <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 1 }} />
-                </Box>
-            </Grid>
-        ))}
-    </Grid>
+    </Box>
 );
 
 export const TaskTableSkeleton = () => (
     <Box>
         {[...Array(7)].map((_, i) => (
-            <Skeleton key={i} variant="rectangular" height={48} sx={{ mb: 0.75, borderRadius: 1 }} />
+            <Skeleton key={i} variant="rectangular" height={48} sx={{ mb: 0.5, borderRadius: 0 }} />
         ))}
     </Box>
 );

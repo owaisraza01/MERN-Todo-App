@@ -9,16 +9,17 @@ import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
+import { tokens } from '../theme/theme';
 
 const STATUS_META = {
     pending:     { label: 'Pending',     color: '#f59e0b' },
-    'in-progress': { label: 'In Progress', color: '#6366f1' },
-    completed:   { label: 'Completed',   color: '#10b981' },
+    'in-progress': { label: 'In Progress', color: tokens.accent },
+    completed:   { label: 'Completed',   color: '#22c55e' },
 };
 const PRIORITY_META = {
-    low:    { label: 'Low',    color: '#10b981' },
+    low:    { label: 'Low',    color: '#22c55e' },
     medium: { label: 'Medium', color: '#f59e0b' },
-    high:   { label: 'High',   color: '#ef4444' },
+    high:   { label: 'High',   color: '#f43f5e' },
 };
 
 const MetaBadge = ({ color, label }) => (
@@ -205,7 +206,7 @@ const TaskDetailsDialog = ({ task, onClose, onRefresh }) => {
                                             border: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.08)'}`,
                                         }}
                                     >
-                                        <Avatar sx={{ width: 18, height: 18, fontSize: 9, bgcolor: '#6366f1' }}>
+                                        <Avatar sx={{ width: 18, height: 18, fontSize: 9, bgcolor: tokens.accent, color: tokens.accentInk }}>
                                             {(u.name || u.email || 'U')[0]}
                                         </Avatar>
                                         <Typography fontSize={12}>{u.name || u.email}</Typography>
@@ -236,7 +237,7 @@ const TaskDetailsDialog = ({ task, onClose, onRefresh }) => {
                                     sx={{
                                         height: '100%',
                                         width: `${subtaskPct}%`,
-                                        bgcolor: subtaskPct === 100 ? '#10b981' : '#6366f1',
+                                        bgcolor: subtaskPct === 100 ? '#22c55e' : tokens.accent,
                                         borderRadius: 1,
                                         transition: 'width 0.3s ease',
                                     }}
@@ -262,7 +263,7 @@ const TaskDetailsDialog = ({ task, onClose, onRefresh }) => {
                                         checked={s.completed}
                                         onChange={() => handleToggleSubtask(s._id)}
                                         size="small"
-                                        sx={{ p: 0.25, color: 'text.disabled', '&.Mui-checked': { color: '#6366f1' } }}
+                                        sx={{ p: 0.25, color: 'text.disabled', '&.Mui-checked': { color: tokens.accent } }}
                                     />
                                     <Typography
                                         fontSize={13}
@@ -311,7 +312,7 @@ const TaskDetailsDialog = ({ task, onClose, onRefresh }) => {
                             )}
                             {(t.comments || []).map((c, i) => (
                                 <Box key={i} display="flex" gap={1.25} alignItems="flex-start">
-                                    <Avatar sx={{ width: 24, height: 24, fontSize: 10, bgcolor: '#6366f1', flexShrink: 0 }}>
+                                    <Avatar sx={{ width: 24, height: 24, fontSize: 10, bgcolor: tokens.accent, color: tokens.accentInk, flexShrink: 0 }}>
                                         {(c.user?.name || c.user?.email || 'U')[0]}
                                     </Avatar>
                                     <Box flex={1}>
@@ -356,7 +357,7 @@ const TaskDetailsDialog = ({ task, onClose, onRefresh }) => {
                                 sx={{
                                     borderRadius: 1,
                                     alignSelf: 'flex-end',
-                                    bgcolor: '#6366f1',
+                                    bgcolor: tokens.accent, color: tokens.accentInk,
                                     color: '#fff',
                                     '&:hover': { bgcolor: '#4f46e5' },
                                     '&.Mui-disabled': { bgcolor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.06)', color: 'text.disabled' },

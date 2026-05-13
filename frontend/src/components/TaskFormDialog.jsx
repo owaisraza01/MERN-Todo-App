@@ -6,17 +6,18 @@ import {
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
+import { tokens } from '../theme/theme';
 
 const PRIORITIES = [
-    { label: 'Low', value: 'low', color: '#10b981' },
+    { label: 'Low', value: 'low', color: '#22c55e' },
     { label: 'Medium', value: 'medium', color: '#f59e0b' },
-    { label: 'High', value: 'high', color: '#ef4444' },
+    { label: 'High', value: 'high', color: '#f43f5e' },
 ];
 
 const STATUSES = [
     { label: 'Pending', value: 'pending', color: '#f59e0b' },
-    { label: 'In Progress', value: 'in-progress', color: '#6366f1' },
-    { label: 'Completed', value: 'completed', color: '#10b981' },
+    { label: 'In Progress', value: 'in-progress', color: tokens.accent },
+    { label: 'Completed', value: 'completed', color: '#22c55e' },
 ];
 
 const EMPTY_FORM = { title: '', description: '', status: 'pending', priority: 'medium', dueDate: '', assignedTo: [] };
@@ -85,8 +86,11 @@ const TaskFormDialog = ({ open, onClose, editTask }) => {
             }}
         >
             <DialogTitle sx={{ px: 3, pt: 3, pb: 1.5 }}>
-                <Typography fontSize={14} fontWeight={700} letterSpacing="0.04em" color="text.primary">
-                    {editTask ? 'EDIT TASK' : 'NEW TASK'}
+                <Typography sx={{ fontFamily: tokens.fontMono, fontSize: 11, color: tokens.accent, letterSpacing: '0.18em', mb: 0.5 }}>
+                    ◆ {editTask ? 'EDIT TASK' : 'NEW TASK'}
+                </Typography>
+                <Typography sx={{ fontFamily: tokens.fontDisplay, fontWeight: 700, fontSize: 22, letterSpacing: '-0.025em', lineHeight: 1 }}>
+                    {editTask ? 'Modify' : 'Compose'}<Box component="span" sx={{ color: tokens.accent }}>.</Box>
                 </Typography>
             </DialogTitle>
 
@@ -188,7 +192,7 @@ const TaskFormDialog = ({ open, onClose, editTask }) => {
                                                     fontSize: 12,
                                                 }}
                                             >
-                                                <Avatar sx={{ width: 16, height: 16, fontSize: 9, bgcolor: '#6366f1' }}>
+                                                <Avatar sx={{ width: 16, height: 16, fontSize: 9, bgcolor: tokens.accent, color: tokens.accentInk }}>
                                                     {(u?.name || u?.email || 'U')[0]}
                                                 </Avatar>
                                                 {u?.name || u?.email}
@@ -208,7 +212,7 @@ const TaskFormDialog = ({ open, onClose, editTask }) => {
                         {users.map(u => (
                             <MenuItem key={u._id} value={u._id}>
                                 <Box display="flex" alignItems="center" gap={1}>
-                                    <Avatar sx={{ width: 20, height: 20, fontSize: 10, bgcolor: '#6366f1' }}>
+                                    <Avatar sx={{ width: 20, height: 20, fontSize: 10, bgcolor: tokens.accent, color: tokens.accentInk }}>
                                         {(u.name || u.email || 'U')[0]}
                                     </Avatar>
                                     <Typography fontSize={13}>{u.name || u.email}</Typography>

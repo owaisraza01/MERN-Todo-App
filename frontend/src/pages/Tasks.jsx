@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
-    Box, Card, CardContent, Typography, Button, Stack, Pagination,
-    ToggleButtonGroup, ToggleButton, Tooltip,
+    Box, Button, Pagination, ToggleButtonGroup, ToggleButton, Tooltip,
 } from '@mui/material';
 import AddTaskIcon from '@mui/icons-material/AddTask';
 import TableRowsRoundedIcon from '@mui/icons-material/TableRowsRounded';
@@ -15,6 +14,7 @@ import TaskKanban from '../components/tasks/TaskKanban';
 import TaskFilterBar from '../components/tasks/TaskFilterBar';
 import TaskFormDialog from '../components/TaskFormDialog';
 import TaskDetailsDialog from '../components/TaskDetailsDialog';
+import PageHeader from '../components/layout/PageHeader';
 
 const LIMIT = 10;
 
@@ -61,9 +61,7 @@ const Tasks = () => {
         }
     }, [filters, page, viewMode]);
 
-    useEffect(() => {
-        fetchTasks();
-    }, [fetchTasks]);
+    useEffect(() => { fetchTasks(); }, [fetchTasks]);
 
     useEffect(() => {
         axios.get('/api/users', { headers: authHeader })
@@ -71,18 +69,8 @@ const Tasks = () => {
             .catch(() => {});
     }, []);
 
-    const handleFilterChange = (newFilters) => {
-        setFilters(newFilters);
-        setPage(1);
-        setSelected([]);
-    };
-
-    const handleFormClose = (refresh = false) => {
-        setOpenForm(false);
-        setEditTask(null);
-        if (refresh) fetchTasks();
-    };
-
+    const handleFilterChange = (newFilters) => { setFilters(newFilters); setPage(1); setSelected([]); };
+    const handleFormClose = (refresh = false) => { setOpenForm(false); setEditTask(null); if (refresh) fetchTasks(); };
     const handleEdit = (task) => { setEditTask(task); setOpenForm(true); };
 
     const handleDelete = async (id) => {
@@ -92,9 +80,7 @@ const Tasks = () => {
             toast.success('Task deleted');
             setSelected(s => s.filter(sid => sid !== id));
             fetchTasks();
-        } catch {
-            toast.error('Failed to delete task');
-        }
+        } catch { toast.error('Failed to delete task'); }
     };
 
     const handleArchive = async (id) => {
@@ -102,9 +88,7 @@ const Tasks = () => {
             await axios.patch(`/api/tasks/${id}/archive`, {}, { headers: authHeader });
             toast.success('Task archived');
             fetchTasks();
-        } catch {
-            toast.error('Failed to archive task');
-        }
+        } catch { toast.error('Failed to archive task'); }
     };
 
     const handleBulkDelete = async () => {
@@ -114,9 +98,7 @@ const Tasks = () => {
             toast.success(`${selected.length} tasks deleted`);
             setSelected([]);
             fetchTasks();
-        } catch {
-            toast.error('Bulk delete failed');
-        }
+        } catch { toast.error('Bulk delete failed'); }
     };
 
     const handleStatusChange = async (taskId, newStatus) => {
@@ -126,22 +108,16 @@ const Tasks = () => {
         try {
             await axios.put(`/api/tasks/${taskId}`, { ...task, status: newStatus }, { headers: authHeader });
             toast.success('Task moved');
-        } catch {
-            toast.error('Failed to update task');
-            fetchTasks();
-        }
+        } catch { toast.error('Failed to update task'); fetchTasks(); }
     };
 
-    const handleViewChange = (_, val) => {
-        if (val) { setViewMode(val); setSelected([]); }
-    };
+    const handleViewChange = (_, val) => { if (val) { setViewMode(val); setSelected([]); } };
 
     const handleExportCSV = () => {
         const headers = ['Title', 'Status', 'Priority', 'Due Date', 'Assignees', 'Created'];
         const rows = tasks.map(t => [
             `"${t.title.replace(/"/g, '""')}"`,
-            t.status,
-            t.priority,
+            t.status, t.priority,
             t.dueDate ? new Date(t.dueDate).toLocaleDateString() : '',
             `"${(t.assignedTo || []).map(u => u.name || u.email).join('; ')}"`,
             new Date(t.createdAt).toLocaleDateString(),
@@ -150,113 +126,78 @@ const Tasks = () => {
         const blob = new Blob([csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url;
-        a.download = 'taskflow-tasks.csv';
-        a.click();
+        a.href = url; a.download = 'taskflow-tasks.csv'; a.click();
         URL.revokeObjectURL(url);
     };
 
     return (
-        <Box>
-            <Card
-                elevation={0}
-                sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider' }}
-            >
-                <CardContent>
-                    <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2.5}>
-                        <Typography variant="h6" fontWeight={800} color="primary">
-                            Tasks
-                        </Typography>
-                        <Stack direction="row" spacing={1.5} alignItems="center">
-                            <Button
-                                variant="outlined"
-                                size="small"
-                                startIcon={<DownloadRoundedIcon />}
-                                onClick={handleExportCSV}
-                                disabled={tasks.length === 0}
-                                sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
-                            >
-                                CSV
-                            </Button>
-                            <ToggleButtonGroup
-                                value={viewMode}
-                                exclusive
-                                onChange={handleViewChange}
-                                size="small"
-                                sx={{ '& .MuiToggleButton-root': { borderRadius: 2, px: 1.5 } }}
-                            >
-                                <Tooltip title="Table view">
-                                    <ToggleButton value="table">
-                                        <TableRowsRoundedIcon fontSize="small" />
-                                    </ToggleButton>
-                                </Tooltip>
-                                <Tooltip title="Kanban view">
-                                    <ToggleButton value="kanban">
-                                        <ViewKanbanRoundedIcon fontSize="small" />
-                                    </ToggleButton>
-                                </Tooltip>
-                            </ToggleButtonGroup>
-                            <Button
-                                variant="contained"
-                                startIcon={<AddTaskIcon />}
-                                onClick={() => setOpenForm(true)}
-                                sx={{
-                                    borderRadius: 2,
-                                    fontWeight: 700,
-                                    textTransform: 'none',
-                                    background: 'linear-gradient(90deg, #6dd5ed 0%, #2193b0 100%)',
-                                    '&:hover': { background: 'linear-gradient(90deg, #2193b0 0%, #6dd5ed 100%)' },
-                                }}
-                            >
-                                Add Task
-                            </Button>
-                        </Stack>
-                    </Stack>
+        <>
+            <PageHeader
+                index="02"
+                title="Tasks"
+                subtitle="Plan, assign and ship — across table and Kanban views, with bulk operations and CSV export."
+                actions={
+                    <>
+                        <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<DownloadRoundedIcon sx={{ fontSize: 14 }} />}
+                            onClick={handleExportCSV}
+                            disabled={tasks.length === 0}
+                        >
+                            Export
+                        </Button>
+                        <ToggleButtonGroup value={viewMode} exclusive onChange={handleViewChange} size="small">
+                            <Tooltip title="Table view"><ToggleButton value="table"><TableRowsRoundedIcon sx={{ fontSize: 16 }} /></ToggleButton></Tooltip>
+                            <Tooltip title="Kanban view"><ToggleButton value="kanban"><ViewKanbanRoundedIcon sx={{ fontSize: 16 }} /></ToggleButton></Tooltip>
+                        </ToggleButtonGroup>
+                        <Button
+                            variant="contained"
+                            size="small"
+                            startIcon={<AddTaskIcon sx={{ fontSize: 14 }} />}
+                            onClick={() => setOpenForm(true)}
+                        >
+                            New Task
+                        </Button>
+                    </>
+                }
+            />
 
-                    <TaskFilterBar filters={filters} onChange={handleFilterChange} users={users} />
+            <Box sx={{ px: { xs: 3, md: 5 }, py: { xs: 3, md: 4 } }}>
+                <TaskFilterBar filters={filters} onChange={handleFilterChange} users={users} />
 
-                    {viewMode === 'table' ? (
-                        <>
-                            <TaskTable
-                                tasks={tasks}
-                                loading={loading}
-                                selected={selected}
-                                onSelectChange={setSelected}
-                                onEdit={handleEdit}
-                                onDelete={handleDelete}
-                                onArchive={handleArchive}
-                                onView={setDetailsTask}
-                                onBulkDelete={handleBulkDelete}
-                            />
-                            {totalPages > 1 && (
-                                <Box display="flex" justifyContent="center" pt={3}>
-                                    <Pagination
-                                        count={totalPages}
-                                        page={page}
-                                        onChange={(_, p) => setPage(p)}
-                                        color="primary"
-                                        shape="rounded"
-                                    />
-                                </Box>
-                            )}
-                        </>
-                    ) : (
-                        <TaskKanban
+                {viewMode === 'table' ? (
+                    <>
+                        <TaskTable
                             tasks={tasks}
-                            onStatusChange={handleStatusChange}
-                            onTaskClick={setDetailsTask}
+                            loading={loading}
+                            selected={selected}
+                            onSelectChange={setSelected}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                            onArchive={handleArchive}
+                            onView={setDetailsTask}
+                            onBulkDelete={handleBulkDelete}
                         />
-                    )}
-                </CardContent>
-            </Card>
+                        {totalPages > 1 && (
+                            <Box display="flex" justifyContent="center" pt={3}>
+                                <Pagination
+                                    count={totalPages}
+                                    page={page}
+                                    onChange={(_, p) => setPage(p)}
+                                    shape="rounded"
+                                />
+                            </Box>
+                        )}
+                    </>
+                ) : (
+                    <TaskKanban tasks={tasks} onStatusChange={handleStatusChange} onTaskClick={setDetailsTask} />
+                )}
+            </Box>
 
             <TaskFormDialog open={openForm} onClose={handleFormClose} editTask={editTask} />
-            <TaskDetailsDialog
-                task={detailsTask}
-                onClose={() => setDetailsTask(null)}
-                onRefresh={fetchTasks}
-            />
-        </Box>
+            <TaskDetailsDialog task={detailsTask} onClose={() => setDetailsTask(null)} onRefresh={fetchTasks} />
+        </>
     );
 };
 
