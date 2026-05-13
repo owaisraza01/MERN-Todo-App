@@ -76,17 +76,38 @@ const Analytics = () => {
     const [loading, setLoading] = useState(true);
 
     const textMuted = theme.palette.text.secondary;
-    const tooltipStyle = {
-        background: dark ? '#111114' : '#fff',
-        border: `1px solid ${dark ? 'rgba(255,255,255,0.1)' : 'rgba(10,10,13,0.1)'}`,
-        borderRadius: 2,
-        fontSize: 11,
-        fontFamily: tokens.fontMono,
-        boxShadow: 'none',
-        color: dark ? '#f5f5f4' : '#0a0a0d',
+
+    const ChartTooltip = ({ active, payload, label }) => {
+        if (!active || !payload || !payload.length) return null;
+        return (
+            <Box
+                sx={{
+                    background: dark ? '#111114' : '#ffffff',
+                    border: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(10,10,13,0.1)'}`,
+                    px: 1.25,
+                    py: 1,
+                    minWidth: 100,
+                }}
+            >
+                {label != null && (
+                    <Typography sx={{ fontFamily: tokens.fontMono, fontSize: 10, color: 'text.secondary', letterSpacing: '0.08em', textTransform: 'uppercase', mb: 0.5 }}>
+                        {label}
+                    </Typography>
+                )}
+                {payload.map((entry, i) => (
+                    <Box key={i} display="flex" alignItems="center" gap={1} sx={{ mt: i > 0 ? 0.25 : 0 }}>
+                        <Box sx={{ width: 8, height: 8, bgcolor: entry.payload?.fill || entry.color || tokens.accent, flexShrink: 0 }} />
+                        <Typography sx={{ fontFamily: tokens.fontMono, fontSize: 11, color: dark ? '#f5f5f4' : '#0a0a0d', flex: 1 }}>
+                            {entry.name}
+                        </Typography>
+                        <Typography sx={{ fontFamily: tokens.fontMono, fontSize: 11, fontWeight: 600, color: dark ? '#f5f5f4' : '#0a0a0d' }}>
+                            {entry.value}
+                        </Typography>
+                    </Box>
+                ))}
+            </Box>
+        );
     };
-    const tooltipItemStyle = { color: dark ? '#f5f5f4' : '#0a0a0d', fontFamily: tokens.fontMono, fontSize: 11 };
-    const tooltipLabelStyle = { color: dark ? '#a1a1aa' : '#52525b', fontFamily: tokens.fontMono, fontSize: 10, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 4 };
 
     const fetchTasks = useCallback(async () => {
         setLoading(true);
@@ -190,7 +211,7 @@ const Analytics = () => {
                                         <CartesianGrid strokeDasharray="2 4" stroke={dark ? 'rgba(255,255,255,0.05)' : 'rgba(10,10,13,0.06)'} vertical={false} />
                                         <XAxis dataKey="week" tick={{ fontSize: 10, fill: textMuted, fontFamily: tokens.fontMono }} axisLine={false} tickLine={false} />
                                         <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: textMuted, fontFamily: tokens.fontMono }} axisLine={false} tickLine={false} />
-                                        <Tooltip contentStyle={tooltipStyle} itemStyle={tooltipItemStyle} labelStyle={tooltipLabelStyle} />
+                                        <Tooltip content={<ChartTooltip />} cursor={{ fill: dark ? 'rgba(255,255,255,0.03)' : 'rgba(10,10,13,0.03)' }} />
                                         <Legend wrapperStyle={{ fontSize: 11, fontFamily: tokens.fontMono, letterSpacing: '0.06em', textTransform: 'uppercase' }} />
                                         <Line type="monotone" dataKey="created" stroke={tokens.accent} strokeWidth={2} dot={{ r: 3, fill: tokens.accent }} name="Created" />
                                         <Line type="monotone" dataKey="completed" stroke="#22c55e" strokeWidth={2} dot={{ r: 3, fill: '#22c55e' }} name="Completed" />
@@ -207,7 +228,7 @@ const Analytics = () => {
                                         <CartesianGrid strokeDasharray="2 4" stroke={dark ? 'rgba(255,255,255,0.05)' : 'rgba(10,10,13,0.06)'} vertical={false} />
                                         <XAxis dataKey="name" tick={{ fontSize: 10, fill: textMuted, fontFamily: tokens.fontMono, letterSpacing: 1 }} axisLine={false} tickLine={false} />
                                         <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: textMuted, fontFamily: tokens.fontMono }} axisLine={false} tickLine={false} />
-                                        <Tooltip contentStyle={tooltipStyle} itemStyle={tooltipItemStyle} labelStyle={tooltipLabelStyle} />
+                                        <Tooltip content={<ChartTooltip />} cursor={{ fill: dark ? 'rgba(255,255,255,0.03)' : 'rgba(10,10,13,0.03)' }} />
                                         <Bar dataKey="value" radius={[0, 0, 0, 0]}>
                                             {priorityData.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
                                         </Bar>
@@ -229,7 +250,7 @@ const Analytics = () => {
                                             <CartesianGrid strokeDasharray="2 4" stroke={dark ? 'rgba(255,255,255,0.05)' : 'rgba(10,10,13,0.06)'} vertical={false} />
                                             <XAxis dataKey="name" tick={{ fontSize: 10, fill: textMuted, fontFamily: tokens.fontMono }} axisLine={false} tickLine={false} interval={0} tickFormatter={v => v.split(' ')[0]} />
                                             <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: textMuted, fontFamily: tokens.fontMono }} axisLine={false} tickLine={false} />
-                                            <Tooltip contentStyle={tooltipStyle} itemStyle={tooltipItemStyle} labelStyle={tooltipLabelStyle} />
+                                            <Tooltip content={<ChartTooltip />} cursor={{ fill: dark ? 'rgba(255,255,255,0.03)' : 'rgba(10,10,13,0.03)' }} />
                                             <Legend wrapperStyle={{ fontSize: 11, fontFamily: tokens.fontMono, letterSpacing: '0.06em', textTransform: 'uppercase' }} />
                                             <Bar dataKey="total" fill={dark ? '#3f3f46' : '#a1a1aa'} radius={[0, 0, 0, 0]} name="Assigned" />
                                             <Bar dataKey="completed" fill={tokens.accent} radius={[0, 0, 0, 0]} name="Completed" />
