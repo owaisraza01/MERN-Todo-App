@@ -83,7 +83,10 @@ const Analytics = () => {
         fontSize: 11,
         fontFamily: tokens.fontMono,
         boxShadow: 'none',
+        color: dark ? '#f5f5f4' : '#0a0a0d',
     };
+    const tooltipItemStyle = { color: dark ? '#f5f5f4' : '#0a0a0d', fontFamily: tokens.fontMono, fontSize: 11 };
+    const tooltipLabelStyle = { color: dark ? '#a1a1aa' : '#52525b', fontFamily: tokens.fontMono, fontSize: 10, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 4 };
 
     const fetchTasks = useCallback(async () => {
         setLoading(true);
@@ -187,7 +190,7 @@ const Analytics = () => {
                                         <CartesianGrid strokeDasharray="2 4" stroke={dark ? 'rgba(255,255,255,0.05)' : 'rgba(10,10,13,0.06)'} vertical={false} />
                                         <XAxis dataKey="week" tick={{ fontSize: 10, fill: textMuted, fontFamily: tokens.fontMono }} axisLine={false} tickLine={false} />
                                         <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: textMuted, fontFamily: tokens.fontMono }} axisLine={false} tickLine={false} />
-                                        <Tooltip contentStyle={tooltipStyle} />
+                                        <Tooltip contentStyle={tooltipStyle} itemStyle={tooltipItemStyle} labelStyle={tooltipLabelStyle} />
                                         <Legend wrapperStyle={{ fontSize: 11, fontFamily: tokens.fontMono, letterSpacing: '0.06em', textTransform: 'uppercase' }} />
                                         <Line type="monotone" dataKey="created" stroke={tokens.accent} strokeWidth={2} dot={{ r: 3, fill: tokens.accent }} name="Created" />
                                         <Line type="monotone" dataKey="completed" stroke="#22c55e" strokeWidth={2} dot={{ r: 3, fill: '#22c55e' }} name="Completed" />
@@ -204,7 +207,7 @@ const Analytics = () => {
                                         <CartesianGrid strokeDasharray="2 4" stroke={dark ? 'rgba(255,255,255,0.05)' : 'rgba(10,10,13,0.06)'} vertical={false} />
                                         <XAxis dataKey="name" tick={{ fontSize: 10, fill: textMuted, fontFamily: tokens.fontMono, letterSpacing: 1 }} axisLine={false} tickLine={false} />
                                         <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: textMuted, fontFamily: tokens.fontMono }} axisLine={false} tickLine={false} />
-                                        <Tooltip contentStyle={tooltipStyle} />
+                                        <Tooltip contentStyle={tooltipStyle} itemStyle={tooltipItemStyle} labelStyle={tooltipLabelStyle} />
                                         <Bar dataKey="value" radius={[0, 0, 0, 0]}>
                                             {priorityData.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
                                         </Bar>
@@ -226,7 +229,7 @@ const Analytics = () => {
                                             <CartesianGrid strokeDasharray="2 4" stroke={dark ? 'rgba(255,255,255,0.05)' : 'rgba(10,10,13,0.06)'} vertical={false} />
                                             <XAxis dataKey="name" tick={{ fontSize: 10, fill: textMuted, fontFamily: tokens.fontMono }} axisLine={false} tickLine={false} interval={0} tickFormatter={v => v.split(' ')[0]} />
                                             <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: textMuted, fontFamily: tokens.fontMono }} axisLine={false} tickLine={false} />
-                                            <Tooltip contentStyle={tooltipStyle} />
+                                            <Tooltip contentStyle={tooltipStyle} itemStyle={tooltipItemStyle} labelStyle={tooltipLabelStyle} />
                                             <Legend wrapperStyle={{ fontSize: 11, fontFamily: tokens.fontMono, letterSpacing: '0.06em', textTransform: 'uppercase' }} />
                                             <Bar dataKey="total" fill={dark ? '#3f3f46' : '#a1a1aa'} radius={[0, 0, 0, 0]} name="Assigned" />
                                             <Bar dataKey="completed" fill={tokens.accent} radius={[0, 0, 0, 0]} name="Completed" />

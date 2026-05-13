@@ -101,7 +101,10 @@ const Dashboard = () => {
         fontSize: 11,
         fontFamily: tokens.fontMono,
         boxShadow: 'none',
+        color: dark ? '#f5f5f4' : '#0a0a0d',
     };
+    const tooltipItemStyle = { color: dark ? '#f5f5f4' : '#0a0a0d', fontFamily: tokens.fontMono, fontSize: 11 };
+    const tooltipLabelStyle = { color: dark ? '#a1a1aa' : '#52525b', fontFamily: tokens.fontMono, fontSize: 10, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 4 };
 
     return (
         <>
@@ -200,7 +203,7 @@ const Dashboard = () => {
                                     <BarChart data={barData} barSize={24}>
                                         <XAxis dataKey="name" tick={{ fontSize: 10, fill: muted, fontFamily: tokens.fontMono, letterSpacing: 1 }} axisLine={false} tickLine={false} />
                                         <YAxis hide />
-                                        <Tooltip contentStyle={tooltipStyle} cursor={{ fill: dark ? 'rgba(255,255,255,0.03)' : 'rgba(10,10,13,0.03)' }} />
+                                        <Tooltip contentStyle={tooltipStyle} itemStyle={tooltipItemStyle} labelStyle={tooltipLabelStyle} cursor={{ fill: dark ? 'rgba(255,255,255,0.03)' : 'rgba(10,10,13,0.03)' }} />
                                         <Bar dataKey="count" radius={[0, 0, 0, 0]}>
                                             {barData.map((e, i) => <Cell key={i} fill={e.fill} />)}
                                         </Bar>
@@ -227,7 +230,7 @@ const Dashboard = () => {
                                         >
                                             {pieData.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
                                         </Pie>
-                                        <Tooltip contentStyle={tooltipStyle} />
+                                        <Tooltip contentStyle={tooltipStyle} itemStyle={tooltipItemStyle} labelStyle={tooltipLabelStyle} />
                                     </PieChart>
                                 </ResponsiveContainer>
                             </Box>
