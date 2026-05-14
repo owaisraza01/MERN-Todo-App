@@ -10,7 +10,7 @@ A precision task-management workspace for teams who treat planning as engineerin
 
 ## Live Demo
 
-- **App:** [https://mern-todo-app-moyn.onrender.com](https://mern-todo-app-moyn.onrender.com)
+- **App:** [https://mern-todo-flow.vercel.app](https://mern-todo-flow.vercel.app)
 - **Frontend:** deployed on Vercel
 - **Backend:** deployed on Railway
 
