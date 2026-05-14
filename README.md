@@ -4,7 +4,14 @@ A precision task-management workspace for teams who treat planning as engineerin
 
 > _"Operate at the speed of thought."_
 
-![TaskFlow](https://github.com/user-attachments/assets/29504f31-2506-4a77-a485-4231ec091969)
+<img width="1918" height="942" alt="image" src="https://github.com/user-attachments/assets/ec9c98f6-5cc6-4b81-a1a9-be30eb37d6d1" />
+
+<img width="1918" height="943" alt="image" src="https://github.com/user-attachments/assets/7850030a-beee-44fa-90cf-917355afb437" />
+
+<img width="1919" height="947" alt="image" src="https://github.com/user-attachments/assets/b8e0a56d-3d5b-4a4b-a888-f1894af28fb8" />
+
+
+
 
 ---
 
